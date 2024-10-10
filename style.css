@@ -1,0 +1,96 @@
+body {
+    background-color: rgb(154, 236, 255);
+    font-size: 24px;
+    color:black;
+}
+
+h1 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 100px;
+    color: blue;
+    text-shadow: 2px 2px 5px blue;
+}
+h2{
+    text-decoration: underline;
+}
+h3{
+    text-decoration: underline;
+}
+.nadpis{
+    font-size: 21px;
+    text-align: center;
+    background-color: rgb(154, 236, 255);
+}
+body h2{
+    color:rgb(62, 62, 255);
+}
+.text{
+    text-transform: none;
+    text-indent: 5px;
+    line-height: 110%;
+    margin: 2%;
+    padding: 0%;
+   
+    border-color: blue;
+    border-width: 5px;
+    background-color: rgb(100, 227, 255);
+}
+
+
+th:hover,
+td:hover {
+    
+    text-align: center;
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #48dbf5;
+}
+table,
+th,
+td {
+    
+    text-align: center;
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #4796f0;
+   
+}
+img{
+    border-radius: 15%;
+    padding:25px;
+    background-image: url('bckgrnd.png');
+}
+.link{
+    font-size: 26px;
+}
+li >a{
+    font-style: oblique;
+}
+#odkazy{
+    font-size: 40px;
+}
+.posadka{
+    display: flex;
+    flex-wrap: wrap;
+}
+.posadka .posadka{
+    box-sizing: border-box;
+}
+@media all and (max-width:1920px){
+    .posadka .postava{
+        flex-basis: 25%;
+    }
+    
+}
+@media all and (max-width:1130px){
+    .posadka .postava{
+        flex-basis: 50%;
+    }
+    
+}
+@media all and (max-width:580px){
+    .posadka .postava{
+        flex-basis: 100%;
+    }
+    
+}
