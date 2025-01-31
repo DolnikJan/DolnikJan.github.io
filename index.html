@@ -1,209 +1,425 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html>
 
 <head>
-    <title>One Piece</title>
-    <!-- vytvořil jsem i tmavou verzi ale úvodní obrázek má stále velmi světlou barvu, přiznám se že se mi teď nechce dělat obrázek bez pozadí, tak to snad tolik nevadí-->
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Pexeso/Miny</title>
+    <style>
+        .tile {
+            background-color: bisque;
+            border: 3px solid brown;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+            height: 25px;
+            width: 25px;
+            text-align: center;
+
+        }
+        body{
+            background-color: rgb(26, 168, 168);
+        }
+        .board {
+            width: 200px;
+            height: 200px;
+            display: block;
+
+        }
+
+        .start {
+            background-color: rgb(23, 152, 226);
+            border: 5px solid rgb(16, 38, 235);
+            border-radius: 5px;
+            height: 120px;
+            width: 300px;
+            display: inline;
+            text-align: center;
+            font-size: 50px;
+            padding: 28px;
+            display: inline;
+        }
+
+        .select {
+            background-color: rgb(23, 152, 226);
+            border: 5px solid rgb(16, 38, 235);
+            border-radius: 5px;
+            height: 120px;
+            width: 600px;
+            display: inline;
+            text-align: center;
+            font-size: 50px;
+            padding: 5px;
+            display: inline;
+        }
+        .timer{
+            background-color: rgb(23, 152, 226);
+            border: 5px solid rgb(16, 38, 235);
+            border-radius: 5px;
+            height: 240px;
+            width: 003px;
+            display: inline;
+            text-align: center;
+            font-size: 50px;
+            padding: 28px;
+            display: inline;
+        }
+    </style>
 </head>
 
 <body>
 
-        <div class='nadpis'>
-            <img src="one_piece.jpg" width="900" alt="Logo seriálu one_piece">
-            <header>
-                <h1><strong>One Piece</strong></h1>
-            </header>
+
+    <div id="app"></div>
+    <script>
+   
+        let counter = 1;
+        let safeSpaces=0;
+        let bombCount=0;
+
+        //vytvoří plochu do které se budou vkládat políčka
+        let start = document.createElement("start");
+
+        let startButton = document.createElement("startButton");
+        start.appendChild(startButton);
+        startButton.innerHTML = "Start New Game";
+        startButton.classList.add("start");
+
+        document.getElementById("app").appendChild(start);
+        startButton.onclick = function () {
+            startGame();
+        }
+        let sizeSelect = document.createElement("select");
+        sizeSelect.classList.add("select");
+        sizeSelect.id = "sizeselect";
+
+        document.getElementById("app").appendChild(sizeSelect);
+        let array = ["Small Size", "Medium Size", "Large Size"];
+        for (let i = 0; i < array.length; i++) {
+            let option = document.createElement("option");
+            option.value = array[i];
+            option.text = array[i];
+            sizeSelect.appendChild(option);
+        }
+
+        let bombSelect = document.createElement("select");
+        bombSelect.classList.add("select");
+        bombSelect.id = "bombselect";
+        let bombs = 0.25;
+        document.getElementById("app").appendChild(bombSelect);
+        let arr = ["💣Small Amount", "💣Medium Amount", "💣Large Amount"];
+        for (let i = 0; i < array.length; i++) {
+            let option = document.createElement("option");
+            option.value = arr[i];
+            option.text = arr[i];
+            bombSelect.appendChild(option);
+        }
+        let timer =document.createElement("timer");
+        timer.classList.add("timer");
+        timer.innerHTML="0:00:00";
+        document.getElementById("app").appendChild(timer);
+
+
+
+
+        let board = document.createElement("board");
+        board.style.display = "grid";
+        board.classList.add("board");
+        //vytvoří nové políčko, value aktuálně nastavuje to co bude napsané uvnitř
+        function newTile(matrix, value, cords) {
+            let tile = document.createElement("tile");
+            let idnumber = value + "";
            
-        </div>
-    
-        <ul>
-            <li><a href="#One_Piece_svět">One Piece svět</a></li>
-            <li><a href="#Luffy">Luffy</a></li>
-            <li><a href="#Luffyho_posádka">Luffyho posádka</a> </li>
-            <li><a href="#Kapitoly"> Kapitoly v kterých se dané postavy připojily k posádce</a></li>
-            <li><a href="#odkazy">Důležité odkazy</a></li>
-        </ul>
+            tile.id = idnumber;
+           
 
-        <hr>
-        <h2 id="One_Piece_svět">One Piece svět</h2>
-        <div class="text">
-        <p>
-            Odehrává se v
-            fantasy světě který je z většiny tvořen mořem s ostrovy. Přesto je celý svět rozdělován velkým kontinentem
-            "Red
-            Line" který se táhne okolo celé planety. Dále je svět rozdělen pásem moře které se nazývá "Grand Line" ve
-            kterém
-            jsou mnohem nepředvídatelnější podmínky než v ostatních mořích. Kolem "Grand Line" se z obou stran táhne pás
-            "Calm belt" ve kterém nevedou žádne vodní proudy a ani nefouká vítr.
-            Lidé v tomto světě mohou sníst ďábelské ovoce které jim umožňují mít obnormální schopnosti, jako třeba
-            tvorba blesků, proměna ve zvíře či nějaký přírodní element. Po snězení tohoto ovoce ale přicházejí o
-            schopnost plavat.
+            tile.classList.add("tile");
+            let tileText = document.createElement("text");
+            tileText.value = cords;
 
-        </p>
-    </div>
-        <div style="text-align: center;">
-            <img src="world.webp" alt="Obrázek světa One Piecu">
-        </div>
-        <hr>
-        <h2 id="Luffy">
-            <strong>Luffy</strong>
-        </h2>
-        <div class="text">
-        <p>
-            Luffy je hlavní postava One Piecu. Luffy je na začátku série sedmnáctiletý hoch, který se sám vypravil
-            hledat poklad One Piece, protože ten kdo
-            tento poklad nalezne se stane králem pirátů. Luffy snědl takzvaný "Gum gum fruit" což je ďábelské ovoce
-            které jemu tělu přidává vlastnosti gumy. Díky tomu se může celé jeho velmi roztahovat, je odolná vůči
-            bleskům a tak dále. Jeho hlavní vzhledový znak je jeho slaměný klobouk podle něhož je i pojmenována jeho posádka "Straw hats". Po celou dobu své cesty potkává nové lidi kteří se k němu na
-            jeho
-            cestu přidávají a chtějí z něj učinit krále pirátů.
+            tileText.id = (value) + "text";
+            let ap = document.getElementById("app");
+            ap.appendChild(board);
+            tile.appendChild(tileText);
+            tile.value = 1000;
+            tileText.innerHTML = "❓";
+            tile.addEventListener("contextmenu", (e) => {
+                e.preventDefault()
+                if (tileText.innerHTML == "❓") {
+                    tileText.innerHTML = "🚩";
+                } else if (tileText.innerHTML == "🚩") {
+                    tileText.innerHTML = "❓";
+                } else { tile.removeEventListener("contextmenu"); }
+            });
+            tile.onclick = function () {
+                if (tileText.innerHTML != "🚩") {
+                    
+                    tile.onlick = null;
+                    tile.value = 0;
+                    let length = matrix.length - 1;
+                 
+                    if ((tile.id - 1) % (matrix.length - 1) != 0) {
+                        if (Number(tile.id) != 0) { document.getElementById((Number(tile.id) - 1) + "").value = 0; }
+                   
 
-        </p>
-    </div>
-        <div class="pic">
-        <img src="luffy.jfif" alt="Obrázek Luffyho">
-    </div>
-        <hr>
-        <h2 id="Luffyho_posádka">
-            <strong>Luffyho posádka</strong>
-        </h2>
-        <div class="posadka">
-            <div class="postava">
-        <h3>
-            Zoro
-        </h3>
-        <div class="text">
-        <p>
+                        if (Number(tile.id) > length) { document.getElementById((Number(tile.id) - (length + 1)) + "").value = 0; }
 
-            První člověk který se k Luffymu přidá je Zoro. Zoro je <strong>šermíř</strong> jehož cílem je se stát nejlepším šermířem na
-            světě. Luffy Zora potká přivázaného ke kůlu a nabídne mu, že ho zachrání když se k němu přidá. Zoro nemá
-            jinou
-            možnost a nabídku přijme. Zoro se prakticky stává pravou rukou Luffyho.
-            Mezi jeho vlastnosti charakteru patří alkoholismus a neexistence orientačního smyslu.
+                        if (tile.id < (matrix.length - 2) * (matrix.length - 1)) {
+                            document.getElementById((Number(tile.id) + (length - 1)) + "").value = 0;
+                        }
+                    }
+                    if (tile.id % (matrix.length - 1) != 0) {
+                      
+                        document.getElementById((Number(tile.id) + 1) + "").value = 0;
+                        if (tile.id < (matrix.length - 2) * (matrix.length - 1)) {
+
+                            document.getElementById((Number(tile.id) + (length + 1)) + "").value = 0;
+                        }
+                        if (Number(tile.id) > length) { document.getElementById((Number(tile.id) - (length - 1)) + "").value = 0; }
+
+                    }
+                    if (Number(tile.id) > length) { document.getElementById((Number(tile.id) - length) + "").value = 0; }
+
+                    if (tile.id < ((matrix.length - 2) * (matrix.length - 1))) {
+                        document.getElementById((Number(tile.id) + length) + "").value = 0;
+                    }
+                 
+                    mines(matrix);
+                    fillMatrix(matrix);
+                    tile.click();
+                }
+            }
+
+            board.appendChild(tile);
+            return tile;
+
+        }
+        function mines(matrix) {
+            for (let i = 0; i < matrix.length - 1; i++) {
+                for (let ii = 0; ii < matrix[0].length; ii++) {
+                    let id = matrix[i][ii].id;
+                    let tile = document.getElementById(id);
+                    id = Number(id) + "text";
+                
+                    let tileText = document.getElementById(id);
 
 
-        </p>
-    </div>
-    <div class="img">
-        <img src="zoro.jfif" alt="Obrázek Zora">
-    </div>
-    </div>
-    <div class="postava">
-        <h3>
-            Nami
-        </h3>
-        <div class="text">
-        <p>
-            Po Zorovi se k Luffymu přidá Nami. Nami je <strong>navigátorka</strong> a tedy kritická součást posádky. Jejím životním snem
-            je
-            zmapovat celý svět. Zprvu se Nami snaží jen Luffyho okrást aby mohla vykoupi svojí vesnici od piríta který
-            se jmenuje Arlong, ale k Luffymu se po pádu Arlonga přidá a stává se jedním z nejvěrnějších členů posádky.
-            Nami má velmi blízko k penězům a stará se o finance posádky. Velmi často se na zbytek posádky naštvává a
-            nutí je se u ní zadlužit.
+                    if (tile.value == 1000) {
+                        if (Math.random() < bombs) {
+                          
+                            tile.value = "💣";
+                            bombCount++;
+                        } else {
+                            tile.value = 0;
+                        }
+                    } 
 
-        </p>
-    </div>
-    <div class="img">
-        <img src="nami.jpg" width="225" alt="Obrázek Nami">
-    </div>
-    </div>
-    <div class="postava">
-        <h3>
-            Ussop
-        </h3>
-        <div class="text">
-        <p>
-            Ussop je <strong>ostřelovač</strong> který používá prak. K Luffymu se přidává aby se stal statečným válečníkem. Při jeho
-            příchodu dostává posádka od Ussopovi kamarádky svojí loď (do té doby měly pouze malou loďku, nyní mají
-            mnohem větší loď) která se jmenuje "Going Merry". Později v příběhu se Ussop od posádky oddělí kvůli
-            neshodám s Luffym ale poté se opět k Luffymu přidá.
-            Ussop má v oblibě velmi často lhát a vymýšlet si.
-        </p>
-    </div>
-    <div class="img">
-        <img src="ussop.webp" width="225" alt="Obrázek Ussopa">
-    </div>
-    </div>
-    <div class="postava">
-        <h3>
-            Sanji
-        </h3>
-        <div class="text">
-        <p>
-            Sanji je velmi schopný <strong>kuchař</strong> který pracuje v restauraci na moři. Jednoho dne chce najít "All Blue" což je
-            místo kde se dají najít všechny ryby světa. Pro dosáhnutí tohoto cíle se přidá k Luffymu a stane se kuchařem
-            posádky. Také zaujímá roli levé ruky Luffyho. Jeho bojový styl se zaměřuje na útoky nohama, protože jeho
-            ruce jsou pouze pro vaření.
-            Sanji je vyloženě gentleman který by za žádných okolnosti neublížil ženě. Zároveň projevuje náklonnost každé
-            ženě kterou potká.
-        </p>
-    </div>
-    <div class="img">
-        <img src="sanji.jfif" width="225" alt="Obrázek Sanjiho">
-    </div>
-    </div>
-    <div class="postava">
-        <h3>
-            Další postavy
-        </h3>
-        <div class="text">
-        <p>
-            K posádce se přidaly i další postavy, ale ty zde již jmenovat nebudu. Popisuji pouze postavy které s Luffym
-            vpluly do "Grand Line".
-        </p>
-    </div>
-    <div class="img">
-        <img src="straw_hats.avif" alt="Obrázek celé posádky">
-    </div>
-    </div>
-    </div>
-        <hr>
-        <h2 id="Kapitoly">
-            Kapitoly v kterých se dané postavy připojily k posádce
-        </h2>
-<div class="table">
-        <table>
-            <tr>
-                <th>Postava</th>
-                <th>Luffy</th>
-                <th>Zoro</th>
-                <th>Nami</th>
-                <th>Ussop</th>
-                <th>Sanji</th>
-            </tr>
-            <tr>
-                <td>Kapitola</td>
-                <td>1</td>
-                <td>5</td>
-                <td>"14"</td>
-                <td>23</td>
-                <td>43</td>
-            </tr>
-            <tr >
-                <td>Dodatek</td>
-                <td>---</td>
-                <td>---</td>
-                <td>V kapitole 14 se k nim přidala, ale nestala se oficiálním členem. Oficiálně se stala členem posádky
-                    až v kapitole 94</td>
-                <td>Ussop později z posádky odešela znovu se připojil v kapitole 438</td>
-                <td>Sanji kvůli rodinným důvodům odešel z posádky a opět se připojil v kapitole 856</td>
-            </tr>
-        </table>
-    </div>
-        <hr>
-        <div class="link">
-        <h2 id="odkazy">
-            Důležité odkazy
-        </h2>
 
-        <a href="https://onepiece.fandom.com/wiki/One_Piece_Wiki"> Více o One Piecu</a>
-        <p></p>
-        <a href="https://mangaplus.shueisha.co.jp/titles/100020"> Oficiální manga online</a>
-    </div>
-    <hr>
-    <img src="one-piece-pixel.gif" style="width:50%; " alt="Luffyho gif">
+                    let length = matrix.length - 1;
+                    tile.onclick = function () {
+                        if (tileText.innerHTML != "🚩") {
+                            if (tile.value != "💣") {
+                                tile.onclick = null;
+                                safeSpaces--;
+                              
+                                tileText.innerHTML = tile.value;
+                                if(safeSpaces-bombCount==0){
+                                    document.getElementsByTagName("body")[0].style.backgroundColor="green";
+                                    for (let i = 1; i <= Math.pow(matrix.length - 1, 2); i++)
+                                    document.getElementById(i).onclick = null;
+                                   
+                                }
+                        
+
+                                if (tile.value == 0) {
+                                    if ((Number(tile.id) - 1) % (matrix.length - 1) != 0) {
+
+                                      
+                                        if (Number(tile.id) > length) {
+                                            document.getElementById((Number(tile.id) - (length + 1)) + "").click();
+                                        }
+                                        if (Number(tile.id) != 0) {
+                                            document.getElementById((Number(tile.id) - 1) + "").click();
+                                        }
+
+                                        if (Number(tile.id) < ((matrix.length - 2) * (matrix.length - 1))) {
+                                            document.getElementById((Number(tile.id) + (length - 1)) + "").click();
+                                        }
+                                    }
+                                    if (Number(tile.id) % (matrix.length - 1) != 0) {
+
+                                       
+                                        document.getElementById((Number(tile.id) + 1) + "").click();
+                                        if (Number(tile.id) < ((matrix.length - 2) * (matrix.length - 1))) {
+
+                                            document.getElementById((Number(tile.id) + (length + 1)) + "").click();
+                                        }
+                                        if (Number(tile.id) > length) {
+                                            document.getElementById((Number(tile.id) - (length - 1)) + "").click();
+                                        }
+
+                                        if (Number(tile.id) > length) {
+                                            document.getElementById((Number(tile.id) - length) + "").click();
+                                        }
+                                    }
+                                    if (Number(tile.id) < ((matrix.length - 2) * (matrix.length - 1))) {
+                                        document.getElementById((Number(tile.id) + length) + "").click();
+                                    }
+                                }
+                            } else {
+                                tileText.innerHTML = tile.value;
+                                document.getElementsByTagName("body")[0].style.backgroundColor="red";
+                                for (let i = 1; i <= Math.pow(matrix.length - 1, 2); i++)
+                                    document.getElementById(i).onclick = null;
+                            }
+                        }
+                    };
+                }
+            }
+            
+        }
+        //vytvoří pole políček
+        let matrix = [];
+        function createMatrix(width, height) {
+            matrix = new Array();
+            for (let i = 0; i <= height; i++) {
+                matrix[i] = new Array(width);
+            }
+            for (let i = 0; i < matrix.length - 1; i++) {
+                for (let ii = 0; ii < matrix[0].length; ii++) {
+                    let cords = [i, ii];
+                    matrix[i][ii] = newTile(matrix, counter, cords);
+                    counter++;
+                }
+
+            }
+            let rows = "repeat(X, 1fr)";
+
+            let s = height + "";
+
+            rows = rows.replace("X", s);
+
+            board.style.gridTemplateColumns = rows;
+
+        }
+        let width = 10;
+
+
+        let sDate=new Date;
+        function startGame() {
+            counter = 1;
+            switch (sizeSelect.value) {
+                case "Small Size":
+                    width = 6;
+                    break;
+                case "Medium Size":
+                    width = 12;
+                    break;
+                case "Large Size":
+                    width = 18;
+                    break;
+                default:
+                    width = 6; 
+            }
+            switch (bombSelect.value) {
+                case "💣Small Amount":
+                    bombs = 0.1;
+                   
+                    break;
+                case "💣Medium Amount":
+                    bombs = 0.25;
+                 
+                    break;
+                case "💣Large Amount":
+                 
+                    bombs = 0.40;
+                    break;
+                default:
+                   
+                    bombs = 0.1; 
+            }
+            while (board.lastChild) {
+                board.removeChild(board.lastChild);
+            }
+             sDate= new Date();
+            setInterval(updateTimer,1000);
+            createMatrix(width, width);
+            document.getElementsByTagName("body")[0].style.backgroundColor=" rgb(26, 168, 168)";
+            safeSpaces=width*width;
+         
+        }
+        function updateTimer(){
+            timer.innerHTML=new Date(new Date().getTime()-sDate.getTime()-3600000).toLocaleTimeString();
+            
+        }
+
+
+        function fillMatrix(matrix) {
+
+            for (let i = 0; i < width; i++) {
+                for (let ii = 0; ii < width; ii++) {
+                    if (matrix[i][ii].value == "💣") {
+                        for (let j = -1; j < 2; j++) {
+                            for (let jj = -1; jj < 2; jj++) {
+                                try {
+                                    if (matrix[i + j][ii + jj].value != "💣") {
+                                        matrix[i + j][ii + jj].value = matrix[i + j][ii + jj].value + 1;
+                                    }
+                                } catch (err) {
+                                    //nic se nestane
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+            }
+            for (let i = 0; i < width; i++) {
+                for (let ii = 0; ii < width; ii++) {
+                    if (matrix[i][ii].value != "💣") {
+                        switch (matrix[i][ii].value) {
+                            case 0:
+                                matrix[i][ii].value = " ";
+                                break;
+                            case 1:
+                                matrix[i][ii].value = "1️⃣";
+                                break;
+                            case 2:
+                                matrix[i][ii].value = "2️⃣";
+                                break;
+                            case 3:
+                                matrix[i][ii].value = "3️⃣";
+                                break;
+                            case 4:
+                                matrix[i][ii].value = "4️⃣";
+                                break;
+                            case 5:
+                                matrix[i][ii].value = "5️⃣";
+                                break;
+                            case 6:
+                                matrix[i][ii].value = "6️⃣";
+                                break;
+                            case 7:
+                                matrix[i][ii].value = "7️⃣";
+                                break;
+                            case 8:
+                                matrix[i][ii].value = "8️⃣";
+                                break;
+
+                            default:
+                            //nic
+                        }
+
+
+                    }
+
+                }
+            }
+
+        }
+
+        
+    </script>
+
 </body>
-
 
 </html>
