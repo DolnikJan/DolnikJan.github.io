@@ -1,12 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const nav = document.createElement('nav');
-    nav.className = 'side-tab';
-    nav.innerHTML = `
-        <a href="base.html">Base</a>
-        <a href="page1.html">Page 1</a>
-        <a href="page2.html">Page 2</a>
-    `;
-    document.body.appendChild(nav);
+ 
 
     // Menu se součástkama
     const parts_menu = document.createElement("div");
@@ -139,3 +132,4 @@ parts_menu.appendChild(cell);
         gridContainer.appendChild(cell);
     }
 });
+
