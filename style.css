@@ -78,8 +78,18 @@ footer {
    ========================================================================== */
 
 .side-tab {
+    position: absolute;
+    min-width: 100px;
+    max-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
     position: fixed;
-    
     top: 50%;
     transform: translateY(-50%);
     background: #222;
