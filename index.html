@@ -7,97 +7,105 @@
 
   <title>Circuit Maker</title>
 <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
   body {
-      margin: 0;
-      padding:0;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    .fabric-canvas-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      touch-action: none; 
-    }
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
 
-    #canvas {
+  header {
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    flex-shrink: 0;
+  }
 
-      display: block;
-    }
+  .main-content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
 
-    header {
-      background-color: #333;
-      color: white;
-      padding: 1px;
-      text-align: center;
-    }
+  .sidebar {
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
+    padding: 15px;
+    width: 150px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
 
+  .sidebar h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .sidebar button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .sidebar button:hover {
+    background-color: #0056b3;
+  }
+
+  main {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .fabric-canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    touch-action: none;
+  }
+
+  #canvas {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
     .main-content {
-      display: flex;
-      flex: 1;
+      flex-direction: column;
     }
 
     .sidebar {
-      background-color: #f9f9f9;
-      border-right: 1px solid #ddd;
-      padding: 15px;
-      width: 150px;
-      height: 80vh;
-      overflow-y: auto;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-      }
-
-      .main-content {
-        flex-direction: column;
-      }
-
-      main {
-        width: 100%;
-      }
-    }
-
-    .sidebar h2 {
-      margin-top: 0;
-      color: #333;
-    }
-
-    .sidebar button {
-      display: block;
       width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .sidebar button:hover {
-      background-color: #0056b3;
+      border-right: none;
+      border-bottom: 1px solid #ddd;
+      max-height: 25vh;
     }
 
     main {
       flex: 1;
-      overflow: hidden;
+      min-height: 0;
     }
-
-    #canvas {
-      display: block;
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
@@ -133,13 +141,24 @@
     let allLines = [];
     let selectedComponent = null;
     let bottom = 0;
+    const GRID_SIZE = 100;
 
+    const GRID_OFFSET_X = 200;
+    const GRID_OFFSET_Y = 0;
+    const GRID_WIDTH = 9;
+    const GRID_HEIGHT = 9;
+    const CANVAS_WIDTH = GRID_SIZE * GRID_WIDTH + GRID_OFFSET_X * 2;
+    const CANVAS_HEIGHT = GRID_SIZE * GRID_HEIGHT + GRID_OFFSET_Y * 2;
+    const GRID_ARRAY_OFFSET_X = 3;
+    const GRID_ARRAY_OFFSET_Y = 1;
+    const DESIGN_WIDTH = 1400;
+    const DESIGN_HEIGHT = 1000;
 
 
 
     const canvasGrid = [];
-    for (let i = 0; i < 9; i += 1) {
-      canvasGrid.push(new Array(9).fill(null));
+    for (let i = 0; i < GRID_HEIGHT; i += 1) {
+      canvasGrid.push(new Array(GRID_WIDTH).fill(null));
     }
     canvasGrid.forEach(row => {
       console.log(row);
@@ -165,7 +184,7 @@
         lockRotation: true,
         id: counter,
         connectionPositions: [0, 45, 0],
-        positionOfRottaion: 0,
+        positionOfRotation: 0,
         lines1: [],
         lines2: [],
         lineColor: color,
@@ -175,6 +194,7 @@
         startY: null,
 
       });
+      counter++;
       canvas.moveObjectTo(img, bottom);
       switch (img.name) {
         case 'Light Bulb':
@@ -197,22 +217,22 @@
       img.on('moving', function (options) {
         hideButtons();
         //https://jsfiddle.net/fabricjs/S9sLu
-        let grid = 100;
-        if (img.left > 200 && img.left < 1200 && img.top > 0 && img.top < 1000) {
+        
+        if (img.left > GRID_OFFSET_X && img.left < DESIGN_WIDTH - GRID_OFFSET_X && img.top > GRID_OFFSET_Y && img.top < DESIGN_HEIGHT - GRID_OFFSET_Y) {
           //console.log("left:" + Math.round(img.left / grid) + " top:" + Math.round(img.top / grid));
 
           /*img.set({
-            left: Math.round(img.left / grid) * grid,
-            top: Math.round(img.top / grid) * grid,
+            left: Math.round(img.left / GRID_SIZE) * GRID_SIZE,
+            top: Math.round(img.top / GRID_SIZE) * GRID_SIZE,
           });*/
-          let gridX = Math.round(img.left / grid) - 3;
-          let gridY = Math.round(img.top / grid) - 1;
-          if (gridY >= 0 && gridY < 9 && gridX >= 0 && gridX < 9 && (canvasGrid[gridY][gridX] == null || canvasGrid[gridY][gridX] === img)) {
+          let gridX = Math.round(img.left / GRID_SIZE) - GRID_ARRAY_OFFSET_X;
+          let gridY = Math.round(img.top / GRID_SIZE) - GRID_ARRAY_OFFSET_Y;
+          if (gridY >= 0 && gridY < GRID_HEIGHT && gridX >= 0 && gridX < GRID_WIDTH && (canvasGrid[gridY][gridX] == null || canvasGrid[gridY][gridX] === img)) {
             // console.log("moving to grid");
 
 
-            img.left = Math.round(img.left / grid) * grid;
-            img.top = Math.round(img.top / grid) * grid;
+            img.left = Math.round(img.left / GRID_SIZE) * GRID_SIZE;
+            img.top = Math.round(img.top / GRID_SIZE) * GRID_SIZE;
             img.gridPositionX = gridX;
             img.gridPositionY = gridY;
             img.setCoords();
@@ -230,11 +250,11 @@
           canvasGrid[img.startY][img.startX] = null;
         }
 
-        if (img.left > 1200) {
+        if (img.left > DESIGN_WIDTH - GRID_OFFSET_X) {
 
           deleteComponent(img);
           return;
-        } else if (img.left < 200) {
+        } else if (img.left < GRID_OFFSET_X) {
 
           img.gridPositionX = null;
           img.gridPositionY = null;
@@ -252,16 +272,12 @@
         }
 
         img.set({
-          left: img.gridPositionX * 100 + 300,
-          top: img.gridPositionY * 100 + 100,
+          left: (img.gridPositionX+GRID_ARRAY_OFFSET_X) * GRID_SIZE,
+          top: (img.gridPositionY + GRID_ARRAY_OFFSET_Y) * GRID_SIZE,
         });
         img.setCoords();
         canvas.requestRenderAll();
-        /*
-        canvasGrid.forEach(row => {
-          console.log(row);
-        });*/
-        console.log('Image mouse up:', img);
+        //console.log('Image mouse up:', img);
         selectedComponent = img;
         showButtons(img);
 
@@ -269,33 +285,9 @@
       });
       img.on('selected', function (options) {
         if (!connecting) {
-          /* console.log('Image selected:', img);
-           selectedComponent = img;
-           showButtons(img);*/
-
         } else {
           let pointer = canvas.getPointer(options.e);
-          console.log('Pointer left:', pointer.x, 'Pointer top:', pointer.y);
-          let pointerPosition, componentPosition;
-          if (img.connectionPositions[0] % 2 == 1) {
-            console.log('Vertical component selected');
-            pointerPosition = pointer.y;
-            componentPosition = img.top;
-          } else {
-            console.log('Horizontal component selected');
-            pointerPosition = pointer.x;
-            componentPosition = img.left;
-          }
-          if (img.connectionPositions[0] > 1) {
-            pointerPosition *= -1;
-            componentPosition *= -1;
-          }
-
-          if (pointerPosition > componentPosition) {
-            connectingto = "plus";
-          } else {
-            connectingto = "minus";
-          }
+          setConnectingTo(img, pointer);
           stopConnecting(img);
         }
       });
@@ -305,11 +297,9 @@
 
     const canvas = new fabric.Canvas('canvas');
     canvas.on('mouse:down', function (options) {
-
-      //console.log('Canvas mouse down:', options);
       if (options.target == null) {
         hideButtons();
-        //console.log('Clicked on empty canvas area, hiding buttons.');
+        
         if (connecting) {
           stopConnecting(null);
         }
@@ -322,7 +312,17 @@
       if (connecting) {
         console.log('Currently connecting, checking if we clicked on a valid target...');
         let pointer = canvas.getPointer(options.e);
-        canvas.getObjects().forEach(obj => {
+        let x = Math.round(pointer.x / GRID_SIZE)-GRID_ARRAY_OFFSET_X;
+        let y = Math.round(pointer.y / GRID_SIZE) - GRID_ARRAY_OFFSET_Y;
+        if(canvasGrid[y][x] == null){
+          console.log('Clicked on empty grid position:', x, y);
+         //stopConnecting(null);
+        } else {
+          console.log('Clicked on grid position with component:', canvasGrid[y][x]);
+          setConnectingTo(canvasGrid[y][x], pointer);
+          stopConnecting(canvasGrid[y][x]);
+        }
+       /* canvas.getObjects().forEach(obj => {
           if (obj.name && obj!==selectedComponent) {
             if(obj.containsPoint(pointer)){
               if(connecting){
@@ -334,36 +334,41 @@
             }
            
           }
-        });
+            
+        });*/
+        
         
       }
+        
     });
     canvas.backgroundColor = 'rgb(48, 87, 225)';
     canvas.preserveObjectStacking = true;
    
 
     canvas.selection = false;
-    for (let i = 1; i < 13; i++) {
-      const lineX = new fabric.Line([200, i * 100 - 50, 1200, i * 100 - 50], {
+    let offset=GRID_SIZE/2;
+    for (let i = 1; i < 11; i++) {
+      const lineY = new fabric.Line([GRID_OFFSET_X, i * GRID_SIZE - offset, DESIGN_WIDTH-GRID_OFFSET_X, i * GRID_SIZE - offset], {
         stroke: 'white',
         strokeWidth: 1,
         selectable: false,
         hoverCursor: 'default',
-
-
-      });
-      lineX.set({
         hasControls: false,
         hasBorders: false,
         lockRotation: true,
+
       });
       
+      
 
-      const lineY = new fabric.Line([i * 100 - 50, 0, i * 100 - 50, 1000], {
+      const lineX = new fabric.Line([i * GRID_SIZE - offset+GRID_OFFSET_X, GRID_OFFSET_Y, i * GRID_SIZE - offset+GRID_OFFSET_X, DESIGN_HEIGHT], {
         stroke: 'white',
         strokeWidth: 1,
         selectable: false,
         hoverCursor: 'default',
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
       });
       canvas.add(lineX);
       canvas.add(lineY);
@@ -371,31 +376,34 @@
       canvas.sendObjectToBack(lineY);
       bottom+=2;
 
-      canvas.requestRenderAll();
-
+     
     }
+  
+          canvas.requestRenderAll();
+
      const rectangle = new fabric.Rect({
       left: 0,
       top: 0,
       fill: 'white',
-      width: 200,
-      height: 1000,
+      width: GRID_OFFSET_X,
+      height: DESIGN_HEIGHT,
       selectable: false,
       evented: false,
     });
+    console.log(rectangle);
     const removeComponentRectangle = new fabric.Rect({
-      left: 1200,
-      top: 0,
+      left: DESIGN_WIDTH-GRID_OFFSET_X,
+      top: GRID_OFFSET_Y,
       fill: 'red',
-      width: 200,
-      height: 1000,
+      width: GRID_OFFSET_X,
+      height: DESIGN_HEIGHT - GRID_OFFSET_Y,
       selectable: false,
       evented: false,
     });
+    
     canvas.add(rectangle);
     canvas.add(removeComponentRectangle);
     canvas.moveObjectTo(rectangle, bottom);
-
     canvas.moveObjectTo(removeComponentRectangle, bottom);
    
     canvas.renderAll();
@@ -485,7 +493,7 @@
       delete_button = img;
       canvas.add(delete_button);
       buttonSetUp(delete_button);
-      delete_button.on('mousedown', function (options) {
+      delete_button.on('mouseup', function (options) {
         deleteComponent(selectedComponent);
       });
       return img;
@@ -575,13 +583,14 @@
       canvas.bringObjectToFront(minus_button);
       canvas.bringObjectToFront(delete_button);
       canvas.bringObjectToFront(rotate_button);
-
+      /*
       text.set('dirty', true);
       text_holder.set('dirty', true);
       plus_button.set('dirty', true);
       minus_button.set('dirty', true);
       delete_button.set('dirty', true);
       rotate_button.set('dirty', true);
+      */
       canvas.requestRenderAll();
     }
     function hideButtons() {
@@ -593,27 +602,28 @@
       rotate_button.set('visible', false);
 
       text.set('dirty', true);
-      text_holder.set('dirty', true);
+     
+     /* text_holder.set('dirty', true);
       plus_button.set('dirty', true);
       minus_button.set('dirty', true);
       delete_button.set('dirty', true);
       rotate_button.set('dirty', true);
-
+      */
 
       canvas.requestRenderAll();
     }
     function buttonSetUp(button) {
       button.set({
-        left: -1000,
-        top: -100,
         hasControls: false,
         hasBorders: false,
         lockRotation: true,
-        selectable: true,
+        selectable: false,
         lockMovementX: true,
         lockMovementY: true,
         dirty: true,
         fill: 'black',
+        hoverCursor: 'pointer',
+        visible:false,
       });
 
     }
@@ -629,32 +639,34 @@
       });
     }
     function deleteComponent(component) {
+       if (component.gridPositionY != null && component.gridPositionX != null) {
+        canvasGrid[component.gridPositionY][component.gridPositionX] = null;
+      }
+      canvas.remove(component);
+      canvas.remove(selectedComponent);
+      selectedComponent = null;
+      
       for (let i = component.lines1.length - 1; i >= 0; i--) {
-        disconnectComponents(component.lines1[i]);
+       disconnectComponents(component.lines1[i]);
       }
       for (let i = component.lines2.length - 1; i >= 0; i--) {
-        disconnectComponents(component.lines2[i]);
+      disconnectComponents(component.lines2[i]);
       }
+     
+      
+            hideButtons();
+            canvas.requestRenderAll();
 
-      canvas.remove(component);
-      canvasGrid[component.gridPositionY][component.gridPositionX] = null;
-      hideButtons();
-      canvas.requestRenderAll();
-
-    }
-    function deleteLine(line) {
-      canvas.remove(line);
-      canvas.requestRenderAll();
     }
     function rotateComponent(component) {
       console.log('Rotating component:', component);
       component.rotate((component.angle + 90) % 360);
       component.set('dirty', true);
       component.set({
-        positionOfRottaion: component.positionOfRottaion + 1,
+        positionOfRotation: component.positionOfRotation + 1,
       });
-      if (component.positionOfRottaion === 4) {
-        component.positionOfRottaion = 0;
+      if (component.positionOfRotation === 4) {
+        component.positionOfRotation = 0;
       }
       switch (component.connectionPositions[0]) {
         case 0:
@@ -677,30 +689,26 @@
     }
     function connectComponents(component1, component2) {
 
-      let x1, y1, x2, y2;
-      if (connectingfrom === "plus") {
-        x1 = component1.connectionPositions[1];
-        y1 = component1.connectionPositions[2];
-      } else {
-        x1 = -component1.connectionPositions[1];
-        y1 = -component1.connectionPositions[2];
-      }
-      if (connectingto === "plus") {
-        x2 = component2.connectionPositions[1];
-        y2 = component2.connectionPositions[2];
-      } else {
-        x2 = -component2.connectionPositions[1];
-        y2 = -component2.connectionPositions[2];
-      }
+      let positions1 = getConnectionPositions(component1);
+      let positions2 = getConnectionPositions(component2);
+      let  index1 = 0;
+      let index2 = 0;
+        if(connectingfrom === "minus"){
+          index1 = 1;
+        }
+        if(connectingto === "minus"){
+          index2 = 1;
+        }
+
       let strokeColor = component1.lineColor;
-      const line = new fabric.Line([component1.left + x1, component1.top + y1, component2.left + x2, component2.top + y2], {
+      const line = new fabric.Line([positions1[index1].x, positions1[index1].y, positions2[index2].x, positions2[index2].y], {
         stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
         strokeWidth: 4,
         selectable: false,
-        positionLeft1: x1,
-        positionTop1: y1,
-        positionLeft2: x2,
-        positionTop2: y2,
+        positionLeft1: positions1[index1].x,
+        positionTop1: positions1[index1].y,
+        positionLeft2: positions2[index2].x,
+        positionTop2: positions2[index2].y,
         connectedFrom: connectingfrom,
         connectedFromComponent: component1,
         connectedTo: connectingto,
@@ -730,11 +738,12 @@
       connecting = true;
       selectedComponent = component;
       strokeColor = component.lineColor;
-      let multiplier = 1;
-      if (connectingfrom === "minus") {
-        multiplier = -1;
-      }
-      connectingLine = new fabric.Line([component.left + component.connectionPositions[1] * multiplier, component.top + component.connectionPositions[2] * multiplier, component.left, component.top], {
+       let positions = getConnectionPositions(component);
+       let index = 0;
+       if(connectingfrom === "minus"){
+        index = 1;
+       }
+      connectingLine = new fabric.Line([positions[index].x, positions[index].y, positions[index].x, positions[index].y], {
         stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
         strokeWidth: 4,
         selectable: false,
@@ -769,40 +778,44 @@
     }
     function getConnectionPositions(component) {
       let positions = [];
-      switch (component.positionOfRottaion) {
+      
+
+      switch (component.positionOfRotation) {
         case 0:
-          positions.push({ x: component.left + 45, y: component.top });
-          positions.push({ x: component.left - 45, y: component.top });
+          positions.push({ x: component.left + 45 , y: component.top });
+          positions.push({ x: component.left - 45 , y: component.top });
           break;
         case 1:
-          positions.push({ x: component.left, y: component.top - 45 });
-          positions.push({ x: component.left, y: component.top + 45 });
+          positions.push({ x: component.left, y: component.top + 45});
+          positions.push({ x: component.left, y: component.top - 45});
           break;
         case 2:
           positions.push({ x: component.left - 45, y: component.top });
           positions.push({ x: component.left + 45, y: component.top });
           break;
         case 3:
-          positions.push({ x: component.left, y: component.top + 45 });
           positions.push({ x: component.left, y: component.top - 45 });
+          positions.push({ x: component.left, y: component.top + 45 });
           break;
       }
       return positions;
     }
     function updateConnectionPositions(component) {
-      const posX = component.connectionPositions[1];
-      const posY = component.connectionPositions[2];
+      let positions = getConnectionPositions(component);
+      
+      //const posX = component.connectionPositions[1];
+      //const posY = component.connectionPositions[2];
 
-      component.lines1.forEach((line, index) => {
+      component.lines1.forEach((line) => {
         if (line.connectedFrom === "plus") {
           line.set({
-            x1: component.left + posX,
-            y1: component.top + posY,
+            x1: positions[0].x,
+            y1: positions[0].y,
           });
         } else {
           line.set({
-            x1: component.left - posX,
-            y1: component.top - posY,
+            x1: positions[1].x,
+            y1: positions[1].y,
           });
         }
         line.setCoords();
@@ -810,19 +823,29 @@
       component.lines2.forEach((line, index) => {
         if (line.connectedTo === "plus") {
           line.set({
-            x2: component.left + posX,
-            y2: component.top + posY,
+            x2: positions[0].x,
+            y2: positions[0].y,
           });
         } else {
           line.set({
-            x2: component.left - posX,
-            y2: component.top - posY,
+            x2: positions[1].x,
+            y2: positions[1].y,
           });
         }
         line.setCoords();
       });
 
       canvas.requestRenderAll();
+    }
+    function setConnectingTo(component, pointer) {
+      let positions = getConnectionPositions(component);
+      let distanceToPlus = Math.hypot(pointer.x - positions[0].x, pointer.y - positions[0].y);
+      let distanceToMinus = Math.hypot(pointer.x - positions[1].x, pointer.y - positions[1].y);
+      if (distanceToPlus < distanceToMinus) {
+        connectingto = "plus";
+      } else {
+        connectingto = "minus";
+      }
     }
     /*
      //https://stackoverflow.com/questions/21931271/how-to-enable-responsive-design-for-fabric-js
@@ -843,8 +866,7 @@
     scaleCanvas();
     */
 
-    const DESIGN_WIDTH = 1400;
-    const DESIGN_HEIGHT = 1000;
+    
 
     function resizeCanvas() {
       // 1. Measure 'main' instead of the canvas container. 
