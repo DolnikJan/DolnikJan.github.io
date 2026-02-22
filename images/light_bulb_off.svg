@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    sodipodi:docname="base.svg"
-   inkscape:export-filename="switch_on.png"
+   inkscape:export-filename="base.svg"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
@@ -73,8 +73,8 @@
        y="5"
        ry="30" />
     <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.81871;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 92.749995,49.999999 H 73.196311"
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 92.749995,49.999999 H 73.749996"
        id="path1" />
     <path
        style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
@@ -93,21 +93,18 @@
        d="m 11.999999,35.749998 h 9.5"
        id="path5" />
     <circle
-       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       id="path13"
-       cx="28.625"
+       style="fill:none;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       id="path6"
+       cx="50"
        cy="50"
-       r="2.375" />
-    <circle
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       id="path14"
-       cx="71.374992"
-       cy="50"
-       r="2.375" />
+       r="23.75" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 26.249999,49.999999 H 73.196311"
-       id="path15"
-       sodipodi:nodetypes="cc" />
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 35.749998,64.249998 28.5,-28.5"
+       id="path8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 35.749998,35.749998 28.5,28.5"
+       id="path9" />
   </g>
 </svg>

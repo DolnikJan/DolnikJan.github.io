@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    sodipodi:docname="minus_button.svg"
-   inkscape:export-filename="plus_button.svg"
+   inkscape:export-filename="delete_button.svg"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -63,21 +63,32 @@
        y="5"
        ry="30" />
     <path
-       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.50001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
-       id="path3"
-       sodipodi:type="arc"
-       sodipodi:cx="50"
-       sodipodi:cy="50"
-       sodipodi:rx="23.75"
-       sodipodi:ry="23.75"
-       sodipodi:start="0"
-       sodipodi:end="4.6406907"
-       sodipodi:open="true"
-       sodipodi:arc-type="arc"
-       d="M 73.75,50 A 23.75,23.75 0 0 1 50.567557,73.743218 23.75,23.75 0 0 1 26.277126,51.134791 23.75,23.75 0 0 1 48.298624,26.311019" />
-    <path
-       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
-       d="M 49.999998,35.75 54.749999,24.132667 45.249998,16.749999"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.50001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 26.249999,73.749998 73.749998,26.249999"
        id="path4" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.50001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 26.249999,26.249999 73.749998,73.749998"
+       id="path5" />
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       id="rect5"
+       width="19"
+       height="19"
+       x="12"
+       y="40.499996"
+       ry="4.9475999" />
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       id="rect5-8"
+       width="19"
+       height="19"
+       x="69"
+       y="40.5"
+       ry="4.9475999" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 30.999999,49.999998 H 68.999998"
+       id="path6" />
   </g>
 </svg>

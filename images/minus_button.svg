@@ -7,8 +7,8 @@
    viewBox="0 0 99.736839 99.736839"
    version="1.1"
    id="svg1"
-   sodipodi:docname="base.svg"
-   inkscape:export-filename="base.png"
+   sodipodi:docname="minus_button.svg"
+   inkscape:export-filename="delete_line_button.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="true"
-     inkscape:zoom="1.6050238"
-     inkscape:cx="93.145034"
-     inkscape:cy="151.71114"
+     inkscape:zoom="2.1620438"
+     inkscape:cx="188.47907"
+     inkscape:cy="188.47907"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="-8"
@@ -65,7 +65,7 @@
      id="layer1"
      transform="matrix(1.0526316,0,0,1.0526316,-2.763158,-2.7631579)">
     <rect
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:9.49999981;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal;fill-rule:nonzero"
        id="rect1"
        width="90"
        height="90"
@@ -73,24 +73,32 @@
        y="5"
        ry="30" />
     <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 92.749995,49.999999 H 73.749996"
-       id="path1" />
-    <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 7.2499998,49.999999 H 26.249999"
-       id="path2" />
-    <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 83.249997,31 v 9.499998"
-       id="path3" />
-    <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 78.499997,35.749998 h 9.500001"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.50001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 26.249999,73.749998 73.749998,26.249999"
        id="path4" />
     <path
-       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 11.999999,35.749998 h 9.5"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:9.50001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 26.249999,26.249999 73.749998,73.749998"
        id="path5" />
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       id="rect5"
+       width="19"
+       height="19"
+       x="12"
+       y="40.499996"
+       ry="4.9475999" />
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       id="rect5-8"
+       width="19"
+       height="19"
+       x="69"
+       y="40.5"
+       ry="4.9475999" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2.375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:normal"
+       d="M 30.999999,49.999998 H 68.999998"
+       id="path6" />
   </g>
 </svg>

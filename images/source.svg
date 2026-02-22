@@ -2,16 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="95mm"
-   height="95mm"
-   viewBox="0 0 95 95"
+   width="99.736839mm"
+   height="99.736839mm"
+   viewBox="0 0 99.736839 99.736839"
    version="1.1"
    id="svg1"
-   inkscape:export-filename="circuit_images\light_bulb.svg"
-   inkscape:export-xdpi="59.384102"
-   inkscape:export-ydpi="59.384102"
+   sodipodi:docname="base.svg"
+   inkscape:export-filename="source.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
-   sodipodi:docname="base_drawings.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,11 +26,10 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     showguides="true"
      showgrid="true"
-     inkscape:zoom="1.4520903"
-     inkscape:cx="63.012608"
-     inkscape:cy="227.60292"
+     inkscape:zoom="1.6050238"
+     inkscape:cx="93.145034"
+     inkscape:cy="151.71114"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="-8"
@@ -38,12 +37,12 @@
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1">
     <inkscape:grid
-       id="grid3"
+       id="grid1"
        units="mm"
-       originx="-2.4999999"
-       originy="-2.5"
-       spacingx="5.0000001"
-       spacingy="4.9999999"
+       originx="-0.13157906"
+       originy="-0.13157915"
+       spacingx="5"
+       spacingy="5"
        empcolor="#0099e5"
        empopacity="0.30196078"
        color="#0099e5"
@@ -51,25 +50,11 @@
        empspacing="5"
        enabled="true"
        visible="true" />
-    <inkscape:grid
-       id="grid6"
-       units="mm"
-       originx="-2.4999999"
-       originy="-2.5"
-       spacingx="2.5000001"
-       spacingy="2.4999999"
-       empcolor="#0099e5"
-       empopacity="0.30196078"
-       color="#0099e5"
-       opacity="0.14901961"
-       empspacing="5"
-       enabled="false"
-       visible="true" />
     <inkscape:page
        x="0"
        y="0"
-       width="95"
-       height="95"
+       width="99.736839"
+       height="99.736839"
        id="page2"
        margin="0"
        bleed="0" />
@@ -77,12 +62,10 @@
   <defs
      id="defs1" />
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-2.5,-2.4999999)">
+     transform="matrix(1.0526316,0,0,1.0526316,-2.763158,-2.7631579)">
     <rect
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
        id="rect1"
        width="90"
        height="90"
@@ -90,28 +73,40 @@
        y="5"
        ry="30" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 5,50 20,-3e-6 z"
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 92.749995,49.999999 H 73.749996"
+       id="path1" />
+    <path
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 7.2499998,49.999999 H 26.249999"
+       id="path2" />
+    <path
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 83.249997,31 v 9.499998"
        id="path3" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 95.000002,49.999997 H 75 95.000002"
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 78.499997,35.749998 h 9.500001"
        id="path4" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 12.5,44.999999 h 5 z"
-       id="path6" />
+       style="fill:#ffffff;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 11.999999,35.749998 h 9.5"
+       id="path5" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="m 87.500001,44.999999 h -2.5 v -2.5 2.5 h -2.5 2.5 v 2.499998 -2.499998 z"
-       id="path7" />
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 45.249999,40.499998 V 59.499997"
+       id="path10" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 25,49.999997 H 44.999999 V 39.999999 59.999998"
-       id="path14" />
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 54.749997,68.999998 V 31"
+       id="path11" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
-       d="M 75,49.999997 H 55 V 29.999998 69.999997"
-       id="path15" />
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="m 26.249999,49.999999 h 19"
+       id="path12" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.74999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       d="M 73.749996,49.999999 H 54.749997"
+       id="path13" />
   </g>
 </svg>
