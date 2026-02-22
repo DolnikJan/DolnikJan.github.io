@@ -193,14 +193,17 @@
     let allLines = [];
     let selectedComponent = null;
     let bottom = 0;
+    let zoom = 1;
+    let lineDeletionMode = false;
+    let timer =false;
     const GRID_SIZE = 100;
 
     const GRID_OFFSET_X = 200;
     const GRID_OFFSET_Y = 0;
     const GRID_WIDTH = 9;
     const GRID_HEIGHT = 9;
-    const CANVAS_WIDTH = GRID_SIZE * GRID_WIDTH + GRID_OFFSET_X * 2;
-    const CANVAS_HEIGHT = GRID_SIZE * GRID_HEIGHT + GRID_OFFSET_Y * 2;
+   // const CANVAS_WIDTH = GRID_SIZE * GRID_WIDTH + GRID_OFFSET_X * 2;
+   // const CANVAS_HEIGHT = GRID_SIZE * GRID_HEIGHT + GRID_OFFSET_Y * 2;
     const GRID_ARRAY_OFFSET_X = 3;
     const GRID_ARRAY_OFFSET_Y = 1;
     const DESIGN_WIDTH = 1400;
@@ -244,6 +247,7 @@
         gridPositionY: null,
         startX: null,
         startY: null,
+        line:null,
 
       });
       counter++;
@@ -263,8 +267,25 @@
           break;
       }
       img.on('mousedown', function (options) {
+          if(timer){
+            console.log("doubleclick");
+            if(img.name === "Switch"){
+        console.log("double clicked switch");
+        turnSwitch(img);
+        canvas.requestRenderAll();
+       }
+
+          }
+        if (!img.longPressTimer) {
+          timer=true;
+          setTimeout(() => {
+            timer=false;
+          }, 400);
+        }
+        /*
         img.startX = img.gridPositionX;
         img.startY = img.gridPositionY;
+        */
       });
       img.on('moving', function (options) {
         hideButtons();
@@ -337,13 +358,18 @@
       });
       img.on('selected', function (options) {
         if (!connecting) {
+          
         } else {
           let pointer = canvas.getPointer(options.e);
           setConnectingTo(img, pointer);
           stopConnecting(img);
         }
       });
+      img.on('mousedblclick', function (options) {
+       
+      });
       canvas.add(img);
+      
 
     }
 
@@ -351,12 +377,30 @@
     canvas.on('mouse:down', function (options) {
       if (options.target == null) {
         hideButtons();
-        
+        if(lineDeletionMode){
+          lineDeletionMode = false;
+          selectedComponent.lines1.forEach((line, index) => {
+            line.set({
+              selectable: false,
+              evented: false,
+              hoverCursor: 'default',
+            });
+          });
+          selectedComponent.lines2.forEach((line, index) => {
+            line.set({
+              selectable: false,
+              evented: false,
+              hoverCursor: 'default',
+            });
+          });
+          canvas.defaultCursor = 'default';
+        }
         if (connecting) {
           stopConnecting(null);
         }
       } else {
         console.log('Clicked on object:', options.target);
+     
       }
     });
     canvas.on('mouse:up', function (options) {
@@ -393,6 +437,7 @@
       }
         
     });
+    
     //rgb(48, 87, 225)'
     canvas.backgroundColor = 'white';
     canvas.preserveObjectStacking = true;
@@ -580,6 +625,24 @@
       });
       return img;
     });
+    var lineDeletionButton;
+    fabric.Image.fromURL('./images/delete_line_button.png').then((img) => {
+      img.set({
+        left: 150,
+        top: 350,
+        originX: 'center',
+        originY: 'center',
+        scaleX: 0.15,
+        scaleY: 0.15,
+      });
+      lineDeletionButton = img;
+      canvas.add(lineDeletionButton);
+      buttonSetUp(lineDeletionButton);
+      lineDeletionButton.on('mousedown', function (options) {
+        toggleLineDeletionMode();
+      });
+      return img;
+    });
 
     canvas.add(text);
 
@@ -617,16 +680,20 @@
 
       });
       delete_button.set({
-        left: image.left - 40,
+        left: image.left - 60,
         top: image.top + 80, // Position text above the image
 
 
       });
       rotate_button.set({
-        left: image.left + 40,
+        left: image.left + 60,
         top: image.top + 80, // Position text above the image
 
 
+      });
+      lineDeletionButton.set({
+        left: image.left,
+        top: image.top + 80, // Position text above the image
       });
       text.set('visible', true);
       text_holder.set('visible', true);
@@ -634,12 +701,13 @@
       minus_button.set('visible', true);
       delete_button.set('visible', true);
       rotate_button.set('visible', true);
+      lineDeletionButton.set('visible', true);
       text.setCoords();
       plus_button.setCoords();
       minus_button.setCoords();
       delete_button.setCoords();
       rotate_button.setCoords();
-
+      lineDeletionButton.setCoords();
 
       canvas.bringObjectToFront(text_holder);
       canvas.bringObjectToFront(text);
@@ -647,6 +715,7 @@
       canvas.bringObjectToFront(minus_button);
       canvas.bringObjectToFront(delete_button);
       canvas.bringObjectToFront(rotate_button);
+      canvas.bringObjectToFront(lineDeletionButton);
       /*
       text.set('dirty', true);
       text_holder.set('dirty', true);
@@ -664,7 +733,7 @@
       minus_button.set('visible', false);
       delete_button.set('visible', false);
       rotate_button.set('visible', false);
-
+      lineDeletionButton.set('visible', false);
       text.set('dirty', true);
      
      /* text_holder.set('dirty', true);
@@ -781,6 +850,14 @@
         hasControls: false,
         hasBorders: false,
       });
+      if(component1 === component2){
+        console.log("connecting switch to itself");
+        component1.set({
+          line: line,
+        });
+      }
+      
+      
       connectingfrom = null;
       connectingto = null;
       component1.lines1.push(line);
@@ -911,126 +988,113 @@
         connectingto = "minus";
       }
     }
-    // Zoom on Ctrl + Mouse Wheel
-    let lastDistance = 0;
-
-    canvas.on('mouse:wheel', function (options) {
-      if (options.e.ctrlKey) {
-      options.e.preventDefault();
-      options.e.stopPropagation();
-
-      const delta = options.e.deltaY;
-      let zoom = canvas.getZoom();
-      zoom *= Math.pow(0.999, delta);
-      
-      // Limit zoom range
-      zoom = Math.max(0.5, Math.min(zoom, 5));
-
-      const pointer = canvas.getPointer(options.e);
-      canvas.zoomToPoint(pointer, zoom);
-      canvas.requestRenderAll();
+    function toggleLineDeletionMode(){
+      console.log("toggling line deletion mode");
+      lineDeletionMode = !lineDeletionMode;
+      if(lineDeletionMode){
+        hideButtons();
+        selectedComponent.lines1.forEach((line, index) => {
+          line.set({
+            selectable: true,
+            evented: true,
+            hoverCursor: 'crosshair',
+          });
+          canvas.bringObjectToFront(line);
+        });
+        selectedComponent.lines2.forEach((line, index) => {
+          line.set({
+            selectable: true,
+            evented: true,
+            hoverCursor: 'crosshair',
+          });
+          canvas.bringObjectToFront(line);
+        });
+        canvas.defaultCursor = 'crosshair';
+        canvas.on('mouse:down', function(options){
+          if(options.target && options.target.type === 'line'){
+            disconnectComponents(options.target);
+          }
+        });
+      } else {
+        canvas.defaultCursor = 'default';
+        canvas.off('mouse:down');
+        selectedComponent.lines1.forEach((line, index) => {
+          line.set({
+            selectable: false,
+            evented: false,
+            hoverCursor: 'default',
+          });
+          canvas.moveObjectTo(line, bottom);
+        });
+        selectedComponent.lines2.forEach((line, index) => {
+          line.set({
+            selectable: false,
+            evented: false,
+            hoverCursor: 'default',
+          });
+          canvas.moveObjectTo(line, bottom);
+        });
       }
-    });
-
-    document.addEventListener('touchmove', function (e) {
-      if (e.touches.length === 2) {
-      e.preventDefault();
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
-
-      if (lastDistance > 0) {
-        const delta = distance - lastDistance;
-        let zoom = canvas.getZoom();
-        zoom *= Math.pow(1.01, delta);
-        zoom = Math.max(0.5, Math.min(zoom, 5));
-
-        const midX = (touch1.clientX + touch2.clientX) / 2;
-        const midY = (touch1.clientY + touch2.clientY) / 2;
-        const pointer = canvas.getPointer({clientX: midX, clientY: midY});
-        canvas.zoomToPoint(pointer, zoom);
-        canvas.requestRenderAll();
-      }
-      lastDistance = distance;
-      }
-    }, {passive: false});
-
-    document.addEventListener('touchend', function () {
-      lastDistance = 0;
-    });
-    /*
-     //https://stackoverflow.com/questions/21931271/how-to-enable-responsive-design-for-fabric-js
-    function scaleCanvas() {
-      const outerCanvasContainer = document.getElementById('fabric-canvas-container');
-    
-      const ratio          = canvas.getWidth() / canvas.getHeight();
-      const containerWidth = outerCanvasContainer.clientWidth;
-      const scale          = containerWidth / canvas.getWidth();
-      const zoom           = canvas.getZoom() * scale;
-    
-      canvas.setDimensions({width: containerWidth, height: containerWidth / ratio});
-      canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
-      canvas.calcOffset();
-      canvas.requestRenderAll();
     }
-    window.addEventListener('resize', scaleCanvas, false);
-    scaleCanvas();
-    */
+    function turnSwitch(component){
+      if(component.name === "Switch"){
 
-    
+       if(component.line!==null){
+        console.log("turning off switch");
+        component.setSrc('./images/switch_off.png').then(() => {
+          disconnectComponents(component.line);
+          component.line = null;
+          canvas.requestRenderAll();
+        });
+       }else{
+        console.log("turning on switch");
+        component.setSrc('./images/switch_on.png').then(() => {
+          connectingfrom="minus";
+          connectingto="plus";
+          connectComponents(component, component);
+          canvas.requestRenderAll();
+        });
+       }
+      }else {
+       console.log("frick you weathor boy)");
+        return;
+      }
+   }
+    //https://fabricjs.com/docs/old-docs/fabric-intro-part-5/
+
+
 
     function resizeCanvas() {
-      // 1. Measure 'main' instead of the canvas container. 
-      // Main is controlled by flexbox, so it never lies about the screen size!
-      const mainElement = document.querySelector('main');
 
-      const availableWidth = mainElement.clientWidth;
-      const availableHeight = mainElement.clientHeight;
-
-      // 2. Calculate the scale for both directions
-      const scaleX = availableWidth / DESIGN_WIDTH;
-      const scaleY = availableHeight / DESIGN_HEIGHT;
-
-      // 3. Pick the SMALLER scale. This ensures it never overflows the bottom OR the sides.
-      let scaleMultiplier = Math.min(scaleX, scaleY);
-
-      // Optional: Stop it from zooming in massively on huge screens
-      if (scaleMultiplier > 1) {
-        scaleMultiplier = 1;
-      }
-
-      // 4. Set the physical size of the canvas element
+      let main = document.querySelector('main');
+      let containerWidth = main.clientWidth;
+      let containerHeight = main.clientHeight;
       canvas.setDimensions({
-        width: DESIGN_WIDTH * scaleMultiplier,
-        height: DESIGN_HEIGHT * scaleMultiplier
+        width: containerWidth,
+        height: containerHeight
       });
-
-      // 5. Tell Fabric to visually shrink everything inside
-      canvas.setZoom(scaleMultiplier);
-
-      // 6. Recalculate mouse coordinates
-      canvas.calcOffset();
+      console.log('Resizing canvas to fit container:', containerWidth, containerHeight);
+       zoom = Math.min(containerWidth / DESIGN_WIDTH, containerHeight / DESIGN_HEIGHT);
+       console.log('Calculated zoom:', zoom);
+      canvas.setZoom(zoom);
       canvas.requestRenderAll();
+      //canvas.setDimensions({ width: containerWidth*zoom, height: containerHeight*zoom });
+      canvas.calcOffset();
+  
     }
-
-    // Ensure the HTML is fully loaded before we try to measure <main>
-    window.addEventListener('load', () => {
-      // Call it immediately on load
-      resizeCanvas();
-
-      // Sometimes the browser needs a split-second to finish drawing the flexbox layout.
-      // This tiny timeout guarantees it measures the perfect final size.
-      setTimeout(resizeCanvas, 50);
+    //https://stackoverflow.com/questions/21931271/how-to-enable-responsive-design-for-fabric-js
+    //time out pro optimalizaci
+    let resizeTimeout;
+    window.addEventListener('resize',()=>{
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeCanvas, 100);
     });
+    resizeCanvas();
+    
+  
 
-    window.addEventListener('resize', resizeCanvas);
 
-
-
-    // var bulb = addComponent('./images/light_bulb.png', 'Light Bulb');
-    // var resistor = addComponent('./images/resistor.png', 'Resistor');
-    // var source = addComponent('./images/source.png', 'Source');
-    // var source2 = addComponent('./images/source.png', 'Source');
+   
 
   </script>
 </body>
