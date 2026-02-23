@@ -46,7 +46,7 @@
   .sidebar {
     background-color: #ffffff;
     padding: 15px;
-    width: 200px; /* Increased slightly for better breathing room */
+    width: 15em; /* Increased slightly for better breathing room */
     overflow-y: auto;
     flex-shrink: 0;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05); /* Shadow on the right */
@@ -57,7 +57,8 @@
   .sidebar[style*="order: 2"] {
      box-shadow: -2px 0 5px rgba(0,0,0,0.05); /* Shadow on the left */
      border-left: none !important; /* Remove the hard border, shadow looks better */
-  }
+    width: 24.5em;
+    }
 
   .sidebar h2 {
     margin-top: 0;
@@ -282,10 +283,10 @@
             timer=false;
           }, 400);
         }
-        /*
+        
         img.startX = img.gridPositionX;
         img.startY = img.gridPositionY;
-        */
+        
       });
       img.on('moving', function (options) {
         hideButtons();
@@ -357,6 +358,9 @@
         showButtons(img);
 
 
+        canvasGrid.forEach(row => {
+          console.log(row);
+        });
       });
       img.on('selected', function (options) {
         if (!connecting) {
@@ -380,6 +384,8 @@
       if (options.target == null) {
         hideButtons();
         if(lineDeletionMode){
+          toggleLineDeletionMode();
+          /*
           lineDeletionMode = false;
           selectedComponent.lines1.forEach((line, index) => {
             line.set({
@@ -396,7 +402,10 @@
             });
           });
           canvas.defaultCursor = 'default';
+          */
         }
+    console.log('Canvas mouse down:');
+      
         if (connecting) {
           stopConnecting(null);
         }
@@ -481,7 +490,7 @@
     const rectangle = new fabric.Rect({
       left: 0,
       top: 0,
-      fill: 'rgba(250, 250, 250)',
+      fill: 'rgba(230, 230, 230)',
       width: GRID_OFFSET_X,
       height: DESIGN_HEIGHT,
       selectable: false,
@@ -492,7 +501,7 @@
     const removeComponentRectangle = new fabric.Rect({
       left: DESIGN_WIDTH - GRID_OFFSET_X,
       top: 0,
-      fill: 'red',
+      fill: 'rgb(255,50,50)',
       width: GRID_OFFSET_X,
       height: DESIGN_HEIGHT,
       selectable: false,
@@ -503,7 +512,7 @@
     const blueRectangle = new fabric.Rect({
       left: GRID_OFFSET_X,
       top: 0,
-      fill: 'rgba(48, 87, 225, 1)',
+      fill: 'rgb(40, 150, 245)',
       width: DESIGN_WIDTH - GRID_OFFSET_X * 2,
       height: DESIGN_HEIGHT,
       selectable: false,
@@ -869,12 +878,13 @@
         perPixelTargetFind: true,
         targetFindTolerance: 5,
       });
+      /*
       if(component1 === component2){
         console.log("connecting switch to itself");
         component1.set({
           line: line,
         });
-      }
+      }*/
       
       
       connectingfrom = null;
@@ -886,6 +896,7 @@
 
       canvas.moveObjectTo(line, bottom);
       canvas.requestRenderAll();
+      return line;
     }
     function disconnectComponents(line) {
       if (!line.connectedFromComponent || !line.connectedToComponent) {
@@ -1078,7 +1089,9 @@
         component.setSrc('./images/switch_on.png').then(() => {
           connectingfrom="minus";
           connectingto="plus";
-          connectComponents(component, component);
+          let line = connectComponents(component, component);
+          line.visible = false;
+          component.line = line;
           canvas.requestRenderAll();
         });
        }
@@ -1087,6 +1100,37 @@
         return;
       }
    }
+
+   function resizeCanvas() {
+    let main = document.querySelector('main');
+    let containerWidth = main.clientWidth;
+    let containerHeight = main.clientHeight;
+
+    // 1. Set physical HTML canvas dimensions to fill the space
+    canvas.setDimensions({
+        width: containerWidth,
+        height: containerHeight
+    });
+
+    // 2. Calculate the zoom scale
+    zoom = Math.min(containerWidth / DESIGN_WIDTH, containerHeight / DESIGN_HEIGHT);
+    canvas.setZoom(zoom);
+
+    // 3. CENTER THE CANVAS! 
+    // Calculate leftover space in physical pixels, divide by 2, and apply to the viewport transform.
+    const panX = (containerWidth - (DESIGN_WIDTH * zoom)) / 2;
+    const panY = (containerHeight - (DESIGN_HEIGHT * zoom)) / 2;
+    
+    // viewportTransform matrix: [scaleX, skewY, skewX, scaleY, panX, panY]
+    let vpt = canvas.viewportTransform;
+    vpt[4] = panX;
+    vpt[5] = panY;
+
+    // 4. Finalize
+    canvas.requestRenderAll();
+    canvas.calcOffset(); // Critical for mouse events to align with the new zoom/pan
+}
+   /*
     function resizeCanvas() {
       //https://fabricjs.com/docs/old-docs/fabric-intro-part-5/
       let main = document.querySelector('main');
@@ -1105,6 +1149,8 @@
       canvas.calcOffset();
   
     }
+    
+    */
     //https://stackoverflow.com/questions/21931271/how-to-enable-responsive-design-for-fabric-js
     //time out pro optimalizaci
     let resizeTimeout;
