@@ -1,18 +1,23 @@
-nodeCount = 0;
-class component {
-    constructor(name, circuit) {
+
+class Component {
+    constructor(name) {
         this.name = name;
-        this.circuit = circuit;
-        circuit.components.push(this);
     }
-    left_node = null;
-    right_node = null;
+    minusNode  = null;
+    plusNode  = null;
     last_updated = null;
     voltage = 0;
     current = 0;
     resistance = 0;
-    number = -1;
+     number = -1;
 
+     replaceNode(oldNode, newNode) {
+        if (this.minusNode  === oldNode) {
+            this.minusNode  = newNode;
+        } else if (this.plusNode  === oldNode) {
+            this.plusNode  = newNode;
+        }
+    }
     setVoltage(voltage) {
         this.voltage = voltage;
         this.last_updated = Date.now();
@@ -43,222 +48,113 @@ class component {
         return this.last_updated;
     }
 
-    connectWithComponent(component, side1, side2) {
-        // side1 and side2: "left" or "right"
-        if ((side1 !== "left" && side1 !== "right") || (side2 !== "left" && side2 !== "right")) {
-            throw new Error('side1 and side2 must be "left" or "right"');
-        }
-        let node1 = null;
-        let node2 = null;
-        if (side1 === "left") {
-            if (this.left_node) {
-                node1 = this.left_node;
-            } else {
-                node1 = createNewNode(this.circuit);
-                this.left_node = node1;
-                node1.addComponent(this);
-
-            }
-
-        } else {
-            if (this.right_node) {
-                node1 = this.right_node;
-            } else {
-                node1 = createNewNode(this.circuit);
-                this.right_node = node1;
-                node1.addComponent(this);
-            }
-        }
-        if (side2 === "left") {
-            if (component.left_node) {
-                node2 = component.left_node;
-
-            } else {
-                node2 = createNewNode(this.circuit);
-                component.left_node = node2;
-                node2.addComponent(component);
-            }
-        } else {
-            if (component.right_node) {
-                node2 = component.right_node;
-            } else {
-                node2 = createNewNode(this.circuit);
-                component.right_node = node2;
-                node2.addComponent(component);
-            }
-        }
-        // If both components already have knots, link the knots together by adding all components from one knot to the other
-        for (let comp of node2.components) {
-            node1.addComponent(comp);
-            if (comp.left_node === node2) {
-                comp.left_node = node1;
-            } else if (comp.right_node === node2) {
-                comp.right_node = node1;
-            }
-        }
-        // Remove node2 from the circuit's node list
-        const index = component.left_node ? component.left_node.circuit.nodes.indexOf(node2) : component.right_node.circuit.nodes.indexOf(node2);
-        if (index > -1) {
-            component.left_node ? component.left_node.circuit.nodes.splice(index, 1) : component.right_node.circuit.nodes.splice(index, 1);
-        }
-        //console.log("Merged nodes: " + node1.number + " and " + node2.number);
-        //console.log(nodeCount);
-        /*}else if (!node1 && !node2) {
-            // Create a new knot if neither component has one and link both components to it
-            const newNode = createNewNode(this.circuit);
-            newNode.addComponent(this);
-            newNode.addComponent(component);
-            if(side1==="left"){
-                this.left_node = newNode;
-            } else {
-                this.right_node = newNode;
-            }   
-            if(side2==="left"){
-                component.left_node = newNode;
-            } else {
-                component.right_node = newNode;
-            }
-            return;
-        } else {
-            // If only one component has a knot, add the other component to that knot
-            const existingNode = node1 || node2;
-            existingNode.addComponent(this);
-            existingNode.addComponent(component);
-            if(!node1){
-                if(side1==="left"){ 
-                    this.left_node = existingNode;
-                }
-                else {
-                    this.right_node = existingNode;
-                }   
-            } else {
-                if(side2==="left"){
-                    component.left_node = existingNode;
-                } else {
-                    component.right_node = existingNode;
-                }
-            }
-                
-            return;
-            */
-
-
-    }
-
-    /* addNeighbor(neighbor, side = "right") {
-         // side: "left" or "right"
-         if (side !== "left" && side !== "right") throw new Error('side must be "left" or "right"');
-         const nodeProp = side === "left" ? "left_node" : "right_node";
-         const neighborProp = side === "left" ? "right_node" : "left_node";
- 
-         if (!this[nodeProp]) {
-             // Create a new knot if it doesn't exist and link both components to it
-             this[nodeProp] = new node();
-             this[nodeProp].addComponent(this);
-             neighbor[neighborProp] = this[nodeProp];
-             this[nodeProp].addComponent(neighbor);
-             return;
-         } else {
-             // If a knot already exists, just add the neighbor to it
-             this[nodeProp].addComponent(neighbor);
-             neighbor[neighborProp] = this[nodeProp];
-             return;
-         }
-     }
-         */
-
-    removeLeftNeighbor(neighbor) {
-        //Remove the links between this component and the neighbor and remove knots if no links remain
-        this.left_links--;
-        neighbor.right_links--;
-        if (this.left_links === 0) {
-            this.left_node.removeComponent(this);
-            this.left_node = null;
-        }
-        if (neighbor.right_links === 0) {
-            neighbor.right_node.removeComponent(neighbor);
-            neighbor.right_node = null;
-        }
-    }
-
-    removeRightNeighbor(neighbor) {
-        //Remove the links between this component and the neighbor and remove knots if no links remain
-        this.right_links--;
-        neighbor.left_links--;
-        if (this.right_links === 0) {
-            this.right_node.removeComponent(this);
-            this.right_node = null;
-        }
-        if (neighbor.left_links === 0) {
-            neighbor.left_node.removeComponent(neighbor);
-            neighbor.left_node = null;
-        }
-    }
+    
+    
 }
-//let voltageSources = [];
 
-class voltageSource extends component {
-    constructor(voltage, circuit) {
-        super("Voltage Source", circuit);
+   
+
+class VoltageSource extends Component {
+    constructor(voltage) {
+        super("Voltage Source");
         this.voltage = voltage;
-        circuit.voltageSources.push(this);
     }
 
     getPower() {
         return this.voltage * this.current;
     }
 }
-class rezistor extends component {
-    constructor(type, resistance, circuit) {
-        super("Rezistor", circuit);
-        this.type = type;
+class Resistor extends Component {
+    constructor(resistance) {
+        super("Resistor");
         this.resistance = resistance;
     }
 
 }
 
-class light_bulb extends component {
-    constructor(current, voltage, resistance, circuit) {
-        super("Light Bulb", circuit);
-        this.current = current;
-        this.voltage = voltage;
+class LightBulb extends Component {
+    constructor(resistance) {
+        super("Light Bulb");
         this.resistance = resistance;
     }
 
 }
 
-class node {
+class Node {
     number = 0;
     circuit = null;
-    constructor(number, circuit) {
-        this.number = number;
-        this.circuit = circuit;
-        //circuit.nodes.push(this);
-    }
     components = [];
     addComponent(component) {
+        if(!this.components.includes(component)) {
         this.components.push(component);
+        }
     }
     removeComponent(component) {
-        this.components = this.components.filter(c => c !== component);
+        this.components.splice(this.components.indexOf(component), 1);
+    }
+    setCircuit(circuit) {
+        this.circuit = circuit;
+    }
+    getComponents() {
+        return this.components;
+    }
+    getCircuit() {
+        return this.circuit;
     }
 
 
 }
 
-function createNewNode(circuit) {
-    const newNode = new node(nodeCount++, circuit);
-    circuit.nodes.push(newNode);
-    //console.log("Created new node with number: " + newNode.number);
-    //console.log(Date.now());
-    return newNode;
-}
 
 
-class circuit {
+class Circuit {
     components = [];
     nodes = [];
     voltageSources = [];
+
+    createComponent(name, value) {
+        let component;
+        switch(name) {
+            case "Resistor":
+                component= new Resistor(value, this);
+                break;
+            case "Voltage Source":
+                component= new VoltageSource(value, this);
+                this.voltageSources.push(component);
+                break;
+            case "Light Bulb":
+                component= new LightBulb(value, this);
+                break;
+            default:
+                throw new Error("Unknown component type: " + name);
+
+        }
+        this.components.push(component);
+
+        
+        component.minusNode = this.createNewNode();
+        component.minusNode.addComponent(component);
+        component.plusNode = this.createNewNode();
+        component.plusNode.addComponent(component);
+        return component;
+    
+    }
+    createNewNode(){
+        let node = new Node();
+        this.nodes.push(node);
+        node.setCircuit(this);
+        return node;
+    }
+    
+    mergeNodes(oldNode, newNode){
+        if(oldNode === newNode) return;
+        for (let component of oldNode.components) {
+            component.replaceNode(oldNode, newNode);
+            newNode.addComponent(component);
+        }
+        this.nodes.splice(this.nodes.indexOf(oldNode), 1);
+    }
+
 }
 function createMatrix(x, y) {
     let matrix = [];
@@ -275,87 +171,47 @@ function setupCircuit(circuit) {
     console.log("Setting up circuit...");
     circuit.voltageSources.forEach(element => { element.number = circuit.voltageSources.indexOf(element); });
     circuit.nodes.forEach(element => { element.number = circuit.nodes.indexOf(element) - 1; });
-    circuit.nodes.shift(); // Remove ground node
-    //circuit.nodes.forEach(element => {console.log(element);});
-    //circuit.components.forEach(element => {element.number = circuit.components.indexOf(element);});
-    console.log("Circuit setup complete.");
+ 
 }
 function prepareMatrixG(circuit) {
-    // Remove ground node (node 0) from the circuit nodes for matrix calculations
-    // circuit.nodes.shift();
-    nodeCount = 0;
-
-    // Assign new numbers to nodes after removing ground
-    /*for (let node of circuit.nodes) {
-        node.number = nodeCount++;
-    }*/
-
-    let matrixG = createMatrix(circuit.nodes.length, circuit.nodes.length);
+    let activeNodesCount=circuit.nodes.length-1;
+    let matrixG = createMatrix(activeNodesCount, activeNodesCount);
     matrixG.forEach(element => {
         console.log(element);
     });
 
-    // Fill in the conductance values
     for (let node of circuit.nodes) {
-        //console.log("Processing node number: " + node.number);
-        for (let component of node.components) {
-            if (component.getResistance() === 0) continue;
-            //console.log("  Adding conductance for component: " + component.getName() + " with resistance: " + 1 / component.getResistance());
-            matrixG[node.number][node.number] += 1 / component.getResistance();
+        if(node.number === -1) continue;
+       for (let component of node.components) {
+            if ((component.getResistance() === undefined) || (!component.minusNode   || !component.plusNode  || (component instanceof VoltageSource)) )  continue;
+            matrixG[node.number][node.number] += 1 / Math.max(component.getResistance(), 0.000001);
         }
     }
     for (let component of circuit.components) {
-        if (component.left_node && component.right_node) {
-            if (component.getResistance() === 0 || component.left_node.number === -1 || component.right_node.number === -1) continue;
-            //console.log("  Subtracting conductance for component between nodes: " + component.left_node.number + " and " + component.right_node.number + " with resistance: " + 1 / component.getResistance());
-            matrixG[component.left_node.number][component.right_node.number] -= 1 / component.getResistance();
-            matrixG[component.right_node.number][component.left_node.number] -= 1 / component.getResistance();
+        if (component.minusNode  && component.plusNode ) {
+            if (component.minusNode .number === -1 || component.plusNode .number === -1 || (component instanceof VoltageSource)) continue;
+            matrixG[component.minusNode .number][component.plusNode .number] -= 1 / Math.max(component.getResistance(), 0.000001);
+            matrixG[component.plusNode .number][component.minusNode .number] -= 1 / Math.max(component.getResistance(), 0.000001);
         }
     }
 
-
-    //matrixG.forEach(element => { console.log(element);});
     return matrixG;
 }
 function prepareMatrixB(circuit) {
-    //onsole.log("Preparing Matrix B for circuit with " + circuit.nodes.length + " nodes and " + circuit.voltageSources.length + " voltage sources.");
-    let rows = circuit.nodes.length;
+    let activeNodes = circuit.nodes.length - 1;
     let cols = circuit.voltageSources.length;
-    let matrixB = createMatrix(rows, cols);
-    //let matrixC = createMatrix(circuit.voltageSources.length, nodeCount);
-    //circuit.voltageSources.forEach(element => { console.log(element); });
-    // console.log("Preparing Matrix B");
-    //matrixB.forEach(element => { console.log(element); });
-    //console.log("Preparing Matrix C");
-    //matrixC.forEach(element => { console.log(element); });
-    //circuit.voltageSources.forEach(element => { console.log(element); });
+    let matrixB = createMatrix(activeNodes, cols);
+
     for (let source of circuit.voltageSources) {
         let index = circuit.voltageSources.indexOf(source);
-        //console.log("Voltage source index: " + index);
-        //console.log(source);
-        //console.log("Processing voltage source at index: " + index);
-        //console.log(source.left_node);
-        //console.log(source.right_node);
-        if (source.left_node && source.left_node.number !== -1 && source.left_node.number < rows) {
-            //console.log("Processing left node of voltage source at index: " + index + " " + source.left_node.number);
-            matrixB[source.left_node.number][index] = 1;
-            /// matrixC[index][source.left_node.number] = 1;
-            //matrixB.forEach(element => { console.log(element); });
-            // console.log("----");
+
+        if (source.minusNode  && source.minusNode .number !== -1 && source.minusNode .number < activeNodes) {
+            matrixB[source.minusNode .number][index] = -1;
         }
-
-
-        if (source.right_node && source.right_node.number !== -1 && source.right_node.number < rows) {
-            // console.log("Processing right node of voltage source at index: " + index + " " + source.right_node.number);
-            matrixB[source.right_node.number][index] = -1;
-            //matrixC[index][source.right_node.number] = -1;
-            //matrixB.forEach(element => { console.log(element); });
-            //console.log("----");
+        if (source.plusNode  && source.plusNode .number !== -1 && source.plusNode .number < activeNodes) {
+            matrixB[source.plusNode .number][index] = 1;
         }
-
     }
-    //console.log("Final Matrix B:");
-    //matrixB.forEach(element => { console.log(element); });
     return matrixB;
 }
 function transposeMatrix(matrix) {
@@ -372,19 +228,8 @@ function prepareMatrixA(circuit) {
     let matrixG = prepareMatrixG(circuit);
     let matrixB = prepareMatrixB(circuit);
     let matrixC = transposeMatrix(matrixB);
-
-    /* console.log("Matrix G:");
-     matrixG.forEach(row => console.log(row));
-     console.log("-----");
-     console.log("Matrix B:");
-     matrixB.forEach(row => console.log(row));
-     console.log("-----");
-     console.log("Matrix C:");
-     matrixC.forEach(row => console.log(row));
-     console.log("-----");*/
-    let rows = matrixG.length + matrixB[0].length;
-    let cols = matrixG[0].length + matrixB.length;
-    let matrixA = createMatrix(rows, cols - 1);
+    let matrixAsize = matrixG.length + matrixB[0].length;
+    let matrixA = createMatrix(matrixAsize, matrixAsize);
     for (let i = 0; i < matrixG.length; i++) {
         for (let j = 0; j < matrixG[0].length; j++) {
             matrixA[i][j] = matrixG[i][j];
@@ -401,26 +246,39 @@ function prepareMatrixA(circuit) {
             matrixA[i + matrixG.length][j] = matrixC[i][j];
         }
     }
-    return matrixA;
+
+    for(let i =0; i<circuit.voltageSources.length; i++){
+        let source = circuit.voltageSources[i];
+        if(!source.minusNode || !source.plusNode ){
+            matrixA[ matrixG.length + i][matrixG.length + i] = 1;
+        }
+
+   
+}
+ return matrixA;
 }
 function prepareMatrixX(circuit) {
     matrixX = createMatrix(circuit.nodes.length + circuit.voltageSources.length, 1);
 
 }
-
 function prepareMatrixZ(circuit) {
-    console.log("Preparing Matrix Z for circuit with " + circuit.nodes.length + " nodes and " + circuit.voltageSources.length + " voltage sources.");
-    let matrixZ = createMatrix(circuit.nodes.length + circuit.voltageSources.length, 1);
-    for (let i = circuit.nodes.length; i < circuit.voltageSources.length + circuit.nodes.length; i++) {
-        matrixZ[i][0] = circuit.voltageSources[i - circuit.nodes.length].getVoltage();
-        console.log("Voltage Source " + (i - circuit.nodes.length) + " Voltage: " + matrixZ[i][0]);
+    let activeNodes = circuit.nodes.length - 1;
+    let matrixZ = createMatrix(activeNodes + circuit.voltageSources.length, 1);
+    
+    // Fill the Z matrix. The first 'activeNodes' rows remain 0.
+    for (let i = 0; i < circuit.voltageSources.length; i++) {
+        let source = circuit.voltageSources[i];
+        if(!source.minusNode  || !source.plusNode ){
+            matrixZ[activeNodes + i][0] = 0;
+        } else {
+
+        matrixZ[activeNodes + i][0] = source.getVoltage();
+        }
     }
-    console.log("Final Matrix Z:");
-    matrixZ.forEach(element => { console.log(element); });
-    console.log("-----");
+    
     return matrixZ;
 }
-function multyplyMatrixByMatrix(matrix1, matrix2) {
+function multiplyMatrixByMatrix(matrix1, matrix2) {
     let result = createMatrix(matrix1.length, matrix2[0].length);
     for (let i = 0; i < matrix1.length; i++) {
         for (let j = 0; j < matrix2[0].length; j++) {
@@ -432,9 +290,9 @@ function multyplyMatrixByMatrix(matrix1, matrix2) {
     return result;
 }
 
-//copilot "create a function which will invert a matrix"
 function matrix_invert(M) {
     const n = M.length;
+    console.log("Inverting matrix of size " + n + "x" + M[0].length);
     if (n === 0 || M[0].length !== n) throw new Error("matrix must be square");
 
     // Create copies: C = M, I = identity
@@ -458,6 +316,7 @@ function matrix_invert(M) {
                 maxRow = r;
             }
         }
+        console.log("Pivoting: max pivot in column " + i + " is " + maxVal + " at row " + maxRow);
         if (maxVal === 0) throw new Error("Matrix is singular and cannot be inverted");
 
         // Swap rows i and maxRow in both C and I
@@ -488,161 +347,35 @@ function matrix_invert(M) {
     return I;
 }
 function calculateCircuit(circuit) {
-    //setupCircuit(circuit);
     let matrixA = prepareMatrixA(circuit);
     let matrixZ = prepareMatrixZ(circuit);
     const Ainv = matrix_invert(matrixA);
-    let matrixI = multyplyMatrixByMatrix(Ainv, matrixZ);
+    let matrixI = multiplyMatrixByMatrix(Ainv, matrixZ);
+    
+    let activeNodes = circuit.nodes.length - 1;
+
     circuit.components.forEach(component => {
-        //console.log("Calculating values for component: " + component.getName());
-        if(component instanceof voltageSource) {
-            component.setCurrent(matrixI[circuit.nodes.length + component.number][0]);
-            //console.log("Voltage Source Current set to: " + component.getCurrent() + " A");
-        } else {
-            //console.log("Calculating current for component number: " + component.number);
-            // Calculate voltage across the component
-            let voltage = 0;
-            if (component.left_node && component.left_node.number !== -1) {
-                voltage += matrixI[component.left_node.number][0];
+         if(component.minusNode  === null || component.plusNode  === null) {
+                console.log("Component " + component.getName() + " is not fully connected. Skipping voltage and current calculation.");
+                return;
             }
-            if (component.right_node && component.right_node.number !== -1) {
-                voltage -= matrixI[component.right_node.number][0];
+        if(component instanceof VoltageSource) {
+            
+            component.setCurrent(matrixI[activeNodes + component.number][0]);
+        } else {
+           
+            let voltage = 0;
+            if (component.minusNode  && component.minusNode .number !== -1) {
+                voltage -= matrixI[component.minusNode .number][0];
+            }
+            if (component.plusNode  && component.plusNode .number !== -1) {
+                voltage += matrixI[component.plusNode .number][0];
             }
             component.setVoltage(voltage);
             component.setCurrent(voltage / component.getResistance());
         }
-        console.log("Component: " + component.getName() + ", Voltage: " + component.getVoltage() + " Volts, Current: " + component.getCurrent() + " Amps, Resistance: " + component.getResistance() + " Ohms");
+        console.log("Component: " + component.getName() + ", Voltage: " + component.getVoltage() + " Volts, Current: " + component.getCurrent() + " Amps");
     });
 
     return matrixI;
 }
-
-/*let myCircuit = new circuit();
-let source = new voltageSource(24, myCircuit);
-let rezistor1 = new rezistor("carbon", 2, myCircuit);
-let rezistor2 = new rezistor("carbon", 6, myCircuit);
-let light_bulb1 = new light_bulb(0, 0, 3, myCircuit);
-let light_bulb2 = new light_bulb(0, 0, 1, myCircuit);
-myCircuit.nodes.forEach(element => { console.log(element); });
-myCircuit.components.forEach(element => { console.log(element); });
-
-
-source.connectWithComponent(rezistor1, "right", "left");
-rezistor1.connectWithComponent(light_bulb1, "right", "left");
-light_bulb1.connectWithComponent(rezistor2, "right", "left");
-rezistor2.connectWithComponent(light_bulb2, "right", "left");
-light_bulb2.connectWithComponent(source, "right", "left");
-matrixG = prepareMatrixG(myCircuit);
-matrixB = prepareMatrixB(myCircuit);
-console.log("Matrix B");
-matrixB.forEach(element => {  console.log(element); });
-
-
-console.log("--------------------------------------------------");
-*/
-nodeCount = 0;
-let myCircuit2 = new circuit();
-
-let V2 = new voltageSource(20, myCircuit2);
-let V1 = new voltageSource(32, myCircuit2);
-let R1 = new rezistor("carbon", 2, myCircuit2);
-let R2 = new rezistor("carbon", 4, myCircuit2);
-let R3 = new rezistor("carbon", 8, myCircuit2);
-
-
-
-V2.connectWithComponent(R1, "right", "left");
-V2.connectWithComponent(R3, "right", "left");
-V2.connectWithComponent(R2, "left", "right");
-
-R1.connectWithComponent(V1, "right", "right");
-
-V1.connectWithComponent(R2, "left", "left");
-V1.connectWithComponent(R3, "left", "right");/*
-setupCircuit(myCircuit2);
-myCircuit2.nodes.forEach(element => { console.log(element); });
-myCircuit2.components.forEach(element => { console.log(element); });
-myCircuit2.voltageSources.forEach(element => { console.log(element); });
-
-console.log("Circuit 2 Components:");
-matrixG2 = prepareMatrixG(myCircuit2);
-
-matrixB2 = prepareMatrixB(myCircuit2);
-
-matrixG2.forEach(element => {  console.log(element); });
-matrixB2.forEach(element => {  console.log(element); });
-*/
-/*
-setupCircuit(myCircuit2);
-matrixB= prepareMatrixB(myCircuit2);
-matrixC= transposeMatrix(matrixB);
-console.log("---------------Transposedmatrixes------------------------------------");
-matrixC.forEach(element => {  console.log(element); });
-console.log("------------------");
-matrixB.forEach(element => {  console.log(element); });
-console.log("---------------------afhakfhalfhalkf-----------------------------");
-*/
-//setupCircuit(myCircuit2);
-
-//setupCircuit(myCircuit2);
-/*
-let matrixA = prepareMatrixA(myCircuit2);
-let matrixZ = prepareMatrixZ(myCircuit2);
-const Ainv2 = matrix_invert(matrixA);
-let matrixI = multyplyMatrixByMatrix(Ainv2, matrixZ);
-
-matrixA = prepareMatrixA(myCircuit2);
-console.log("MatrixA:");
-matrixA.forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix A-----------------------------");
-
-matrixZ = prepareMatrixZ(myCircuit2);
-console.log("MatrixZ:");
-matrixZ.forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix Z-----------------------------");
-
-// Ensure A is square before inverting
-if (!matrixA.length || matrixA.length !== matrixA[0].length) {
-    throw new Error("Matrix A must be square for MNA (rows !== cols): " + matrixA.length + "x" + (matrixA[0] ? matrixA[0].length : 0));
-}
-
-const Ainv = matrix_invert(matrixA);
-console.log("Matrix Inverted A:");
-Ainv.forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix Inverted A-----------------------------");
-
-console.log("Matrix AxA-1:");
-multyplyMatrixByMatrix(matrixA, Ainv).forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix AxA-1-----------------------------");
-
-console.log("Matrix I:");
-matrixI = multyplyMatrixByMatrix(Ainv, matrixZ);
-matrixI.forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix I-----------------------------");
-
-console.log("Matrix AxI:");
-multyplyMatrixByMatrix(matrixA, matrixI).forEach(row => { console.log(row); });
-console.log("---------------------endof Matrix AxI-----------------------------");
-
-//multyplyMatrixByMatrix(matrixA, matrixI).forEach(element => {  console.log(element); });
-*/
-calculateCircuit(myCircuit2).forEach(row => { console.log(row); });
-/*
-//matrixG.forEach(element => {console.log(element);});
-
-console.log("Power Supply Power: " + source.getCurrent() + " Amps" + ", Voltage: " + source.getVoltage() + " Volts" + ", Resistance: " + source.getResistance() + " Ohms");
-console.log("Rezistor Resistance: " + rezistor1.getCurrent() + " Amps" + ", Voltage: " + rezistor1.getVoltage() + " Volts" + ", Resistance: " + rezistor1.getResistance() + " Ohms");
-console.log("Light Bulb Current: " + light_bulb1.getCurrent() + " Amps" + ", Voltage: " + light_bulb1.getVoltage() + " Volts" + ", Resistance: " + light_bulb1.getResistance() + " Ohms");
-console.log("Rezistor2 Resistance: " + rezistor2.getCurrent() + " Amps" + ", Voltage: " + rezistor2.getVoltage() + " Volts" + ", Resistance: " + rezistor2.getResistance() + " Ohms");
-console.log("Light Bulb2 Current: " + light_bulb2.getCurrent() + " Amps" + ", Voltage: " + light_bulb2.getVoltage() + " Volts" + ", Resistance: " + light_bulb2.getResistance() + " Ohms");
-
-//calculateSeriesCircuit(source);
-
-console.log("Power Supply Power: " + source.getCurrent() + " Amps" + ", Voltage: " + source.getVoltage() + " Volts" + ", Resistance: " + source.getResistance() + " Ohms");
-console.log("Rezistor Resistance: " + rezistor1.getCurrent() + " Amps" + ", Voltage: " + rezistor1.getVoltage() + " Volts" + ", Resistance: " + rezistor1.getResistance() + " Ohms");
-console.log("Light Bulb Current: " + light_bulb1.getCurrent() + " Amps" + ", Voltage: " + light_bulb1.getVoltage() + " Volts" + ", Resistance: " + light_bulb1.getResistance() + " Ohms");
-console.log("Rezistor2 Resistance: " + rezistor2.getCurrent() + " Amps" + ", Voltage: " + rezistor2.getVoltage() + " Volts" + ", Resistance: " + rezistor2.getResistance() + " Ohms");
-console.log("Light Bulb2 Current: " + light_bulb2.getCurrent() + " Amps" + ", Voltage: " + light_bulb2.getVoltage() + " Volts" + ", Resistance: " + light_bulb2.getResistance() + " Ohms");
-*/
-
-

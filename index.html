@@ -324,8 +324,10 @@
         }
 
         if (img.left > DESIGN_WIDTH - GRID_OFFSET_X) {
-
+          console.log("deleting component");
           deleteComponent(img);
+          canvas.remove(img);
+          
           return;
         } else if (img.left < GRID_OFFSET_X) {
 
@@ -604,6 +606,8 @@
       buttonSetUp(delete_button);
       delete_button.on('mouseup', function (options) {
         deleteComponent(selectedComponent);
+        canvas.remove(selectedComponent);
+        selectedComponent = null;
       });
       return img;
     });
@@ -772,23 +776,35 @@
       });
     }
     function deleteComponent(component) {
-       if (component.gridPositionY != null && component.gridPositionX != null) {
-        canvasGrid[component.gridPositionY][component.gridPositionX] = null;
-      }
-      canvas.remove(component);
-      canvas.remove(selectedComponent);
-      selectedComponent = null;
-      
-      for (let i = component.lines1.length - 1; i >= 0; i--) {
-       disconnectComponents(component.lines1[i]);
-      }
-      for (let i = component.lines2.length - 1; i >= 0; i--) {
+  try {
+    if (!component) return;
+
+    if (component.gridPositionY != null && component.gridPositionX != null) {
+      canvasGrid[component.gridPositionY][component.gridPositionX] = null;
+    }
+    
+    // Disconnect lines immediately
+    for (let i = component.lines1.length - 1; i >= 0; i--) {
+      disconnectComponents(component.lines1[i]);
+    }
+    for (let i = component.lines2.length - 1; i >= 0; i--) {
       disconnectComponents(component.lines2[i]);
-      }
-     
-      
-            hideButtons();
-            canvas.requestRenderAll();
+    }
+    
+
+    // THE FIX: Defer the removal to the next tick of the Javascript event loop
+    // This allows Fabric to finish its mousedown event before the array mutates
+    setTimeout(() => {
+      console.log("Removing component from canvas:", component);
+      canvas.discardActiveObject(); 
+      canvas.remove(component);
+      canvas.requestRenderAll();
+    }, 100);
+
+  } catch(e) {
+    console.error("Error deleting component:", e);
+  }
+      hideButtons();
 
     }
     function rotateComponent(component) {
@@ -849,6 +865,9 @@
         evented: false,
         hasControls: false,
         hasBorders: false,
+        lockRotation: true,
+        perPixelTargetFind: true,
+        targetFindTolerance: 5,
       });
       if(component1 === component2){
         console.log("connecting switch to itself");
@@ -869,6 +888,14 @@
       canvas.requestRenderAll();
     }
     function disconnectComponents(line) {
+      if (!line.connectedFromComponent || !line.connectedToComponent) {
+        console.error("Line is not properly connected:", line);
+        return;
+      }
+      if(!line){
+        console.error("Line is null or undefined:", line);
+        return;
+      }
       line.connectedFromComponent.lines1.splice(line.connectedFromComponent.lines1.indexOf(line), 1);
       line.connectedToComponent.lines2.splice(line.connectedToComponent.lines2.indexOf(line), 1);
       allLines.splice(allLines.indexOf(line), 1);
@@ -1060,12 +1087,8 @@
         return;
       }
    }
-    //https://fabricjs.com/docs/old-docs/fabric-intro-part-5/
-
-
-
     function resizeCanvas() {
-
+      //https://fabricjs.com/docs/old-docs/fabric-intro-part-5/
       let main = document.querySelector('main');
       let containerWidth = main.clientWidth;
       let containerHeight = main.clientHeight;
