@@ -52,8 +52,6 @@ class Component {
     
 }
 
-   
-
 class VoltageSource extends Component {
     constructor(voltage) {
         super("Voltage Source");
@@ -104,8 +102,6 @@ class Node {
 
 
 }
-
-
 
 class Circuit {
     components = [];
