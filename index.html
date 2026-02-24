@@ -207,10 +207,14 @@
         <div class="main-content">
             <aside class="sidebar">
                 <h2>Components</h2>
-                <button onclick="myApp.componentManager.addComponent('./images/light_bulb_off.png', 'Light Bulb')">Add Light Bulb</button>
-                <button onclick="myApp.componentManager.addComponent('./images/resistor.png', 'Resistor')">Add Resistor</button>
-                <button onclick="myApp.componentManager.addComponent('./images/source.png', 'Voltage Source')">Add Voltage Source</button>
-                <button onclick="myApp.componentManager.addComponent('./images/switch_off.png', 'Switch')">Add Switch</button>
+                <button onclick="myApp.componentManager.addComponent('./images/light_bulb_off.png', 'Light Bulb')">Add
+                    Light Bulb</button>
+                <button onclick="myApp.componentManager.addComponent('./images/resistor.png', 'Resistor')">Add
+                    Resistor</button>
+                <button onclick="myApp.componentManager.addComponent('./images/source.png', 'Voltage Source')">Add
+                    Voltage Source</button>
+                <button onclick="myApp.componentManager.addComponent('./images/switch_off.png', 'Switch')">Add
+                    Switch</button>
             </aside>
             <aside class="sidebar" style="order: 2; border-right: none; border-left: 1px solid #ddd;">
                 <h2>Properties</h2>
@@ -251,7 +255,7 @@
             uiManager;
             zoom;
 
-            
+
 
             setMode(newMode) {
                 this.mode = newMode;
@@ -306,41 +310,212 @@
              
              */
             }
-             
-            bindEvents() {
-        this.canvas.on('mouse:down', (options) => {
-            if (options.target == null) {
-                this.uiManager.hideButtons();
-                if (this.mode === 'lineDeletion') {
-                    this.wireManager.toggleLineDeletionMode();
-                }
-                console.log('Canvas mouse down:');
-                if (this.mode === 'connect') {
-                    this.wireManager.stopConnecting(null);
-                }
-            }
-        });
 
-        this.canvas.on('mouse:up', (options) => {
-            console.log('Canvas mouse up:');
-            if (this.mode === 'connect') {
-                let pointer = this.canvas.getPointer(options.e);
-                let x = Math.round(pointer.x / this.gridManager.gridSize) - this.gridManager.gridArrayOffsetX;
-                let y = Math.round(pointer.y / this.gridManager.gridSize) - this.gridManager.gridArrayOffsetY;
-                
-                // If we clicked on a grid slot that has a component
-                if (this.gridManager.canvasGrid[y] && this.gridManager.canvasGrid[y][x] != null) {
-                    let targetComponent = this.gridManager.canvasGrid[y][x];
-                    this.wireManager.setConnectingTo(targetComponent, pointer);
-                    this.wireManager.stopConnecting(targetComponent);
+            bindEvents() {
+                this.canvas.on('mouse:down', (options) => {
+                    let target = options.target;
+                    if (!target) {
+                        this.uiManager.hideButtons();
+                        if (this.mode === 'lineDeletion') {
+                            this.wireManager.toggleLineDeletionMode();
+                        } else if (this.mode === 'connect') {
+                            this.wireManager.stopConnecting(null);
+                        }
+                        return;
+                    }
+                    if (this.mode === "lineDeletion" && target.entityType !== "line") {
+                        this.wireManager.toggleLineDeletionMode();
+                        this.uiManager.hideButtons();
+                        return;
+                    }
+
+                    switch (target.entityType) {
+                        case "component":
+
+                            if (this.componentManager.timer) {
+                                if (target.name === "Switch") {
+                                    console.log("double clicked switch");
+                                    this.componentManager.turnSwitch(target);
+                                    this.canvas.requestRenderAll();
+                                }
+                            }
+                            this.componentManager.selectedComponent = target;
+                            this.componentManager.timer = true;
+                            setTimeout(() => {
+                                this.componentManager.timer = false;
+                            }, 400);
+                            target.startX = target.gridPositionX;
+                            target.startY = target.gridPositionY;
+
+
+
+                            break;
+                        case "line":
+                            if (this.mode === 'lineDeletion') {
+                                this.wireManager.disconnectComponents(target);
+                                this.uiManager.hideButtons();
+                            }
+                            break;
+                        case "button":
+                            let parentComponent = target.parentComponent;
+                            switch (target.buttonType) {
+                                case "rotate":
+                                    console.log("rotating component");
+                                    this.componentManager.rotateComponent(parentComponent);
+                                    break;
+                                case "delete":
+                                    console.log("deleting component");
+                                    this.componentManager.deleteComponent(parentComponent);
+                                    break;
+                                case "plus":
+                                    console.log("starting to connect from plus");
+                                    this.wireManager.connectingFrom = "plus";
+                                    this.wireManager.startConnecting(parentComponent);
+
+                                    break;
+                                case "minus":
+                                    console.log("starting to connect from minus");
+                                    this.wireManager.connectingFrom = "minus";
+                                    this.wireManager.startConnecting(parentComponent);
+                                    break;
+                                case "lineDeletion":
+                                    console.log("toggling line deletion mode");
+                                    this.wireManager.toggleLineDeletionMode();
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            break;
+                        default:
+                            break;
+
+                    }
+                    this.canvas.requestRenderAll();
+                });
+                this.canvas.on('object:moving', (options) => {
+                    let target = options.target;
+                    if (target.entityType === "component") {
+                        this.uiManager.hideButtons();
+                        let gridPossition = this.gridManager.getGridArrayFromPosition(target.left, target.top);
+                        if (gridPossition) {
+                            if (this.gridManager.isGridPositionEmpty(gridPossition.gridX, gridPossition.gridY) || (target.gridPositionX === gridPossition.gridX && target.gridPositionY === gridPossition.gridY)) {
+                                target.left = Math.round(target.left / this.gridManager.gridSize) * this.gridManager.gridSize;
+                                target.top = Math.round(target.top / this.gridManager.gridSize) * this.gridManager.gridSize;
+                                target.gridPositionX = gridPossition.gridX;
+                                target.gridPositionY = gridPossition.gridY;
+                                target.setCoords();
+                            }
+                        }
+                        this.componentManager.updateConnectionPositions(target);
+                    }
+                    this.canvas.requestRenderAll();
+                });
+                this.canvas.on('mouse:move', (options) => {
+                    if (this.mode === 'connect' && this.wireManager.connectingLine) {
+                        let pointer = this.canvas.getPointer(options.e);
+                        this.wireManager.connectingLine.set({
+                            x2: pointer.x,
+                            y2: pointer.y,
+                        });
+                        this.wireManager.connectingLine.setCoords();
+                        this.canvas.requestRenderAll();
+                    }
+                });
+                this.canvas.on('mouse:up', (options) => {
+                    let target = options.target;
+                    if (this.mode === 'connect') {
+                        let pointer = this.canvas.getPointer(options.e);
+                        let gridPosition = this.gridManager.getGridArrayFromPosition(pointer.x, pointer.y);
+                        if (gridPosition) {
+                            let x = gridPosition.gridX;
+                            let y = gridPosition.gridY;
+
+                        if (this.gridManager.canvasGrid[y] && this.gridManager.canvasGrid[y][x] != null) {
+                            let targetComponent = this.gridManager.canvasGrid[y][x];
+                            this.wireManager.setConnectingTo(targetComponent, pointer);
+                            this.wireManager.stopConnecting(targetComponent);
+                        } else {
+                           //this.wireManager.stopConnecting(null);
+                        }
+                    }
                 }
+                    if (target && target.entityType === "component") {
+                        this.gridManager.clearOldPositionOfComponent(target);
+                        if (target.left > this.gridManager.designWidth - this.gridManager.gridOffsetX) {
+                            console.log("deleting component");
+                            this.componentManager.deleteComponent(target);
+                            this.canvas.remove(target);
+                            return;
+                        } else if (target.left < this.gridManager.gridOffsetX) {
+                            target.gridPositionX = null;
+                            target.gridPositionY = null;
+                            [...target.lines1].forEach((line) => {
+                                this.wireManager.disconnectComponents(line);
+                            });
+                            [...target.lines2].forEach((line) => {
+                                this.wireManager.disconnectComponents(line);
+                            });
+                            return;
+                        } else {
+                            this.gridManager.addComponentToGrid(target, target.gridPositionX, target.gridPositionY);
+                            target.set({
+                                left: (target.gridPositionX + this.gridManager.gridArrayOffsetX) * this.gridManager.gridSize,
+                                top: (target.gridPositionY + this.gridManager.gridArrayOffsetY) * this.gridManager.gridSize,
+                            });
+                            target.setCoords();
+                            this.canvas.requestRenderAll();
+                            this.componentManager.selectedComponent = target;
+                            console.log("showing buttons for component:", target);
+                            this.uiManager.showButtons(target);
+                        }
+
+                    }
+                    this.canvas.requestRenderAll();
+                });
+            
+                /*
+                this.canvas.on('mouse:up', (options) => {
+                    console.log('Canvas mouse up:');
+                    if (this.mode === 'connect') {
+                        if(target.entityType==="button"){
+                            return;
+                        }
+                        let pointer = this.canvas.getPointer(options.e);
+                        let x = Math.round(pointer.x / this.gridManager.gridSize) - this.gridManager.gridArrayOffsetX;
+                        let y = Math.round(pointer.y / this.gridManager.gridSize) - this.gridManager.gridArrayOffsetY;
+
+                        // If we clicked on a grid slot that has a component
+                        if (this.gridManager.canvasGrid[y] && this.gridManager.canvasGrid[y][x] != null) {
+                            let targetComponent = this.gridManager.canvasGrid[y][x];
+                            console.log("Attempting to connect to component at grid position:", x, y, targetComponent);
+                            this.wireManager.setConnectingTo(targetComponent, pointer);
+                            this.wireManager.stopConnecting(targetComponent);
+                        }
+                    }
+                });
+*/
+
+
+                this.canvas.on('mouse:down', (options) => {
+                    if (options.target == null) {
+                        this.uiManager.hideButtons();
+                        if (this.mode === 'lineDeletion') {
+                            this.wireManager.toggleLineDeletionMode();
+                        }
+                        console.log('Canvas mouse down:');
+                        if (this.mode === 'connect') {
+                            this.wireManager.stopConnecting(null);
+                        }
+                    }
+                });
+
+                
             }
-        });
-    }
             init() {
                 this.gridManager.drawGridLines(this.canvas);
                 this.gridManager.drawBackground(this.canvas);
-                
+
 
                 this.resizeCanvas();
                 this.setMode("select");
@@ -352,24 +527,24 @@
             resizeTimeout = setTimeout(() => this.resizeCanvas(), 100);
         });*/
             prepareCircuit() {
-            for (let line of this.wireManager.allLines) {
-                let componentFrom = line.connectedFromComponent.calculatorComponent;
-                let fromNode = componentFrom.minusNode;
-                if (line.connectedFrom === "plus") {
-                    fromNode = componentFrom.plusNode;
+                for (let line of this.wireManager.allLines) {
+                    let componentFrom = line.connectedFromComponent.calculatorComponent;
+                    let fromNode = componentFrom.minusNode;
+                    if (line.connectedFrom === "plus") {
+                        fromNode = componentFrom.plusNode;
+                    }
+                    let componentTo = line.connectedToComponent;
+                    let toNode = componentTo.calculatorComponent.minusNode;
+                    if (line.connectedTo === "plus") {
+                        toNode = componentTo.calculatorComponent.plusNode;
+                    }
+                    this.myCircuit.mergeNodes(fromNode, toNode);
+
                 }
-                let componentTo = line.connectedToComponent;
-                let toNode = componentTo.calculatorComponent.minusNode;
-                if (line.connectedTo === "plus") {
-                    toNode = componentTo.calculatorComponent.plusNode;
-                }
-                this.myCircuit.mergeNodes(fromNode, toNode);
 
             }
+        }
 
-        }
-        }
-        
         class GridManager {
             constructor(circuitManager, gridSize, gridOffsetX, gridOffsetY, gridWidth, gridHeight, gridArrayOffsetX, gridArrayOffsetY, designWidth, designHeight) {
                 this.canvas = circuitManager.canvas;
@@ -385,8 +560,8 @@
                 this.designHeight = designHeight;
                 this.canvasGrid = [];
                 this.setUpCanvasGrid();
-           }
-           bottom=1;
+            }
+            bottom = 1;
 
             drawBackground(canvas) {
                 const deskRectangle = new fabric.Rect({
@@ -423,18 +598,18 @@
                 this.canvas.sendObjectToBack(blueRectangle);
                 this.canvas.sendObjectToBack(deskRectangle);
                 this.canvas.sendObjectToBack(removeComponentRectangle);
-                this.bottom+=3;
+                this.bottom += 3;
                 this.canvas.renderAll();
             }
             drawGridLines(canvas) {
                 let offset = this.gridSize / 2;
-                
+
                 for (let i = 1; i < 11; i++) {
                     const lineY = new fabric.Line([
-                        this.gridOffsetX, 
-                        (i * this.gridSize) - offset, 
-                        this.designWidth - this.gridOffsetX, 
-                        (i * this.gridSize) - offset  
+                        this.gridOffsetX,
+                        (i * this.gridSize) - offset,
+                        this.designWidth - this.gridOffsetX,
+                        (i * this.gridSize) - offset
                     ], {
                         stroke: 'white',
                         strokeWidth: 1,
@@ -446,9 +621,9 @@
                         lockRotation: true,
                     });
                     const lineX = new fabric.Line([
-                        (i * this.gridSize) - offset + this.gridOffsetX, 
-                        this.gridOffsetY, 
-                        (i * this.gridSize) - offset + this.gridOffsetX, 
+                        (i * this.gridSize) - offset + this.gridOffsetX,
+                        this.gridOffsetY,
+                        (i * this.gridSize) - offset + this.gridOffsetX,
                         this.designHeight
                     ], {
                         stroke: 'white',
@@ -460,12 +635,12 @@
                         hasBorders: false,
                         lockRotation: true,
                     });
-                    
+
                     canvas.add(lineX);
                     canvas.add(lineY);
                     canvas.sendObjectToBack(lineX);
                     canvas.sendObjectToBack(lineY);
-                    this.bottom+=2;
+                    this.bottom += 2;
                 }
                 canvas.requestRenderAll();
             }
@@ -489,13 +664,18 @@
             }
             isGridPositionEmpty(gridX, gridY) {
                 if (gridY >= 0 && gridY < this.gridHeight && gridX >= 0 && gridX < this.gridWidth) {
-                return this.canvasGrid[gridY][gridX] == null;
+                    return this.canvasGrid[gridY][gridX] == null;
                 }
                 return false;
             }
             removeComponentFromGrid(component) {
                 if (component.gridPositionY != null && component.gridPositionX != null) {
-                    this.canvasGrid[component.gridPositionY ][component.gridPositionX] = null;
+                    this.canvasGrid[component.gridPositionY][component.gridPositionX] = null;
+                }
+            }
+            clearOldPositionOfComponent(component) {
+                if (component.startX != null && component.startY != null) {
+                    this.canvasGrid[component.startY][component.startX] = null;
                 }
             }
             addComponentToGrid(component, gridX, gridY) {
@@ -508,13 +688,13 @@
         }
 
         class ComponentManager {
-            constructor( circuitManager) {
+            constructor(circuitManager) {
                 this.canvas = circuitManager.canvas;
                 this.circuitManager = circuitManager;
             }
             allComponents = [];
             selectedComponent = null;
-            timer=false;
+            timer = false;
 
 
             addComponent(url, name) {
@@ -522,12 +702,13 @@
                     img.name = name;
                     this.setUpComponent(img);
                     this.allComponents.push(img);
+                    this.canvas.requestRenderAll();
                     return img;
                 });
             }
 
             deleteComponent(component) {
-            
+
                 if (!component) return;
                 this.circuitManager.gridManager.removeComponentFromGrid(component);
 
@@ -544,268 +725,273 @@
                     this.canvas.remove(component);
                     this.canvas.requestRenderAll();
                 }, 100);
-            this.circuitManager.uiManager.hideButtons();
+                this.circuitManager.uiManager.hideButtons();
 
-        }
+            }
 
             getConnectionPositions(component) {
-            let positions = [];
-            switch (component.positionOfRotation) {
-                case 0:
-                    positions.push({ x: component.left + 45, y: component.top });
-                    positions.push({ x: component.left - 45, y: component.top });
-                    break;
-                case 1:
-                    positions.push({ x: component.left, y: component.top + 45 });
-                    positions.push({ x: component.left, y: component.top - 45 });
-                    break;
-                case 2:
-                    positions.push({ x: component.left - 45, y: component.top });
-                    positions.push({ x: component.left + 45, y: component.top });
-                    break;
-                case 3:
-                    positions.push({ x: component.left, y: component.top - 45 });
-                    positions.push({ x: component.left, y: component.top + 45 });
-                    break;
+                let positions = [];
+                switch (component.positionOfRotation) {
+                    case 0:
+                        positions.push({ x: component.left + 45, y: component.top });
+                        positions.push({ x: component.left - 45, y: component.top });
+                        break;
+                    case 1:
+                        positions.push({ x: component.left, y: component.top + 45 });
+                        positions.push({ x: component.left, y: component.top - 45 });
+                        break;
+                    case 2:
+                        positions.push({ x: component.left - 45, y: component.top });
+                        positions.push({ x: component.left + 45, y: component.top });
+                        break;
+                    case 3:
+                        positions.push({ x: component.left, y: component.top - 45 });
+                        positions.push({ x: component.left, y: component.top + 45 });
+                        break;
+                }
+                return positions;
             }
-            return positions;
-        }
 
             setUpComponent(img) {
-            let color = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
-            img.set({
-                left: 50,
-                dirty: true,
-                scaleX: 0.25,
-                scaleY: 0.25,
-                originX: 'center',
-                originY: 'center',
-                hasControls: false,
-                hasBorders: false,
-                lockRotation: true,
-                connectionPositions: [0, 45, 0],
-                positionOfRotation: 0,
-                lines1: [],
-                lines2: [],
-                lineColor: color,
-                gridPositionX: null,
-                gridPositionY: null,
-                startX: null,
-                startY: null,
-                line: null,
-                calculatorComponent: null
-
-            });
-            if (img.name !== "Switch") {
-                img.calculatorComponent = this.circuitManager.myCircuit.createComponent(img.name, 20);
-            }
-            switch (img.name) {
-                case 'Light Bulb':
-                    img.top = 150;
-                    break;
-                case 'Resistor':
-                    img.top = 250;
-                    break;
-                case 'Voltage Source':
-                    img.top = 350;
-                    break;
-                case 'Switch':
-                    img.top = 450;
-                    break;
-            }
-            img.on('mousedown', (options) => {
-                if (this.timer) {
-                    console.log("doubleclick");
-                    if (img.name === "Switch") {
-                        console.log("double clicked switch");
-                        this.turnSwitch(img);
-                        this.canvas.requestRenderAll();
-                    }
-
-                }
-                if (!img.longPressTimer) {
-                    this.timer = true;
-                    setTimeout(() => {
-                        this.timer = false;
-                    }, 400);
-                }
-                img.startX = img.gridPositionX;
-                img.startY = img.gridPositionY;
-            });
-            img.on('moving', (options) => {
-                this.circuitManager.uiManager.hideButtons();
-                //https://jsfiddle.net/fabricjs/S9sLu
-                if (img.left > this.circuitManager.gridManager.gridOffsetX && img.left < this.circuitManager.gridManager.designWidth - this.circuitManager.gridManager.gridOffsetX && img.top > this.circuitManager.gridManager.gridOffsetY && img.top < this.circuitManager.gridManager.designHeight - this.circuitManager.gridManager.gridOffsetY) {
-                    let gridX = Math.round(img.left / this.circuitManager.gridManager.gridSize) - this.circuitManager.gridManager.gridArrayOffsetX;
-                    let gridY = Math.round(img.top / this.circuitManager.gridManager.gridSize) - this.circuitManager.gridManager.gridArrayOffsetY;
-                    if (gridY >= 0 && gridY < this.circuitManager.gridManager.gridHeight && gridX >= 0 && gridX < this.circuitManager.gridManager.gridWidth && (this.circuitManager.gridManager.canvasGrid[gridY][gridX] == null || this.circuitManager.gridManager.canvasGrid[gridY][gridX] === img)) {
-                        img.left = Math.round(img.left / this.circuitManager.gridManager.gridSize) * this.circuitManager.gridManager.gridSize;
-                        img.top = Math.round(img.top / this.circuitManager.gridManager.gridSize) * this.circuitManager.gridManager.gridSize;
-                        img.gridPositionX = gridX;
-                        img.gridPositionY = gridY;
-                        img.setCoords();
-                    }
-
-                }
-                this.updateConnectionPositions(img);
-            });
-            img.on('mouseup', (options) => {
-
-                if (img.startX != null && img.startY != null) {
-                    this.circuitManager.gridManager.canvasGrid[img.startY][img.startX] = null;
-                }
-
-                if (img.left > this.circuitManager.gridManager.designWidth - this.circuitManager.gridManager.gridOffsetX) {
-                    console.log("deleting component");
-                    this.circuitManager.componentManager.deleteComponent(img);
-                    this.canvas.remove(img);
-
-                    return;
-                } else if (img.left < this.circuitManager.gridManager.gridOffsetX) {
-
-                    img.gridPositionX = null;
-                    img.gridPositionY = null;
-                    img.lines1.forEach((line, index) => {
-                        this.circuitManager.wireManager.disconnectComponents(line);
-                    });
-                    img.lines2.forEach((line, index) => {
-                        this.circuitManager.wireManager.disconnectComponents(line);
-                    });
-                    return;
-                }
-
-                if (img.gridPositionX != null && img.gridPositionY != null) {
-                    this.circuitManager.gridManager.canvasGrid[img.gridPositionY][img.gridPositionX] = img;
-                }
-
+                let color = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
                 img.set({
-                    left: (img.gridPositionX + this.circuitManager.gridManager.gridArrayOffsetX) * this.circuitManager.gridManager.gridSize,
-                    top: (img.gridPositionY + this.circuitManager.gridManager.gridArrayOffsetY) * this.circuitManager.gridManager.gridSize,
+                    left: 50,
+                    dirty: true,
+                    scaleX: 0.25,
+                    scaleY: 0.25,
+                    originX: 'center',
+                    originY: 'center',
+                    hasControls: false,
+                    hasBorders: false,
+                    lockRotation: true,
+                    connectionPositions: [0, 45, 0],
+                    positionOfRotation: 0,
+                    lines1: [],
+                    lines2: [],
+                    lineColor: color,
+                    gridPositionX: null,
+                    gridPositionY: null,
+                    startX: null,
+                    startY: null,
+                    line: null,
+                    calculatorComponent: null,
+                    
+
                 });
-                img.setCoords();
+                img.entityType = 'component';
+                if (img.name !== "Switch") {
+                    img.calculatorComponent = this.circuitManager.myCircuit.createComponent(img.name, 20);
+                }
+                switch (img.name) {
+                    case 'Light Bulb':
+                        img.top = 150;
+                        break;
+                    case 'Resistor':
+                        img.top = 250;
+                        break;
+                    case 'Voltage Source':
+                        img.top = 350;
+                        break;
+                    case 'Switch':
+                        img.top = 450;
+                        break;
+                }
+                /*
+                img.on('mousedown', (options) => {
+                    if (this.timer) {
+                        console.log("doubleclick");
+                        if (img.name === "Switch") {
+                            console.log("double clicked switch");
+                            this.turnSwitch(img);
+                            this.canvas.requestRenderAll();
+                        }
+
+                    }
+                    if (!img.longPressTimer) {
+                        this.timer = true;
+                        setTimeout(() => {
+                            this.timer = false;
+                        }, 400);
+                    }
+                    img.startX = img.gridPositionX;
+                    img.startY = img.gridPositionY;
+                });
+                img.on('moving', (options) => {
+                    this.circuitManager.uiManager.hideButtons();
+                    //https://jsfiddle.net/fabricjs/S9sLu
+                    if (img.left > this.circuitManager.gridManager.gridOffsetX && img.left < this.circuitManager.gridManager.designWidth - this.circuitManager.gridManager.gridOffsetX && img.top > this.circuitManager.gridManager.gridOffsetY && img.top < this.circuitManager.gridManager.designHeight - this.circuitManager.gridManager.gridOffsetY) {
+                        let gridX = Math.round(img.left / this.circuitManager.gridManager.gridSize) - this.circuitManager.gridManager.gridArrayOffsetX;
+                        let gridY = Math.round(img.top / this.circuitManager.gridManager.gridSize) - this.circuitManager.gridManager.gridArrayOffsetY;
+                        if (gridY >= 0 && gridY < this.circuitManager.gridManager.gridHeight && gridX >= 0 && gridX < this.circuitManager.gridManager.gridWidth && (this.circuitManager.gridManager.canvasGrid[gridY][gridX] == null || this.circuitManager.gridManager.canvasGrid[gridY][gridX] === img)) {
+                            img.left = Math.round(img.left / this.circuitManager.gridManager.gridSize) * this.circuitManager.gridManager.gridSize;
+                            img.top = Math.round(img.top / this.circuitManager.gridManager.gridSize) * this.circuitManager.gridManager.gridSize;
+                            img.gridPositionX = gridX;
+                            img.gridPositionY = gridY;
+                            img.setCoords();
+                        }
+
+                    }
+                    this.updateConnectionPositions(img);
+                });
+                img.on('mouseup', (options) => {
+
+                    if (img.startX != null && img.startY != null) {
+                        this.circuitManager.gridManager.canvasGrid[img.startY][img.startX] = null;
+                    }
+
+                    if (img.left > this.circuitManager.gridManager.designWidth - this.circuitManager.gridManager.gridOffsetX) {
+                        console.log("deleting component");
+                        this.circuitManager.componentManager.deleteComponent(img);
+                        this.canvas.remove(img);
+
+                        return;
+                    } else if (img.left < this.circuitManager.gridManager.gridOffsetX) {
+
+                        img.gridPositionX = null;
+                        img.gridPositionY = null;
+                        img.lines1.forEach((line, index) => {
+                            this.circuitManager.wireManager.disconnectComponents(line);
+                        });
+                        img.lines2.forEach((line, index) => {
+                            this.circuitManager.wireManager.disconnectComponents(line);
+                        });
+                        return;
+                    }
+
+                    if (img.gridPositionX != null && img.gridPositionY != null) {
+                        this.circuitManager.gridManager.canvasGrid[img.gridPositionY][img.gridPositionX] = img;
+                    }
+
+                    img.set({
+                        left: (img.gridPositionX + this.circuitManager.gridManager.gridArrayOffsetX) * this.circuitManager.gridManager.gridSize,
+                        top: (img.gridPositionY + this.circuitManager.gridManager.gridArrayOffsetY) * this.circuitManager.gridManager.gridSize,
+                    });
+                    img.setCoords();
+                    this.canvas.requestRenderAll();
+                    //console.log('Image mouse up:', img);
+                    this.circuitManager.componentManager.selectedComponent = img;
+                    console.log("showing buttons for component:", img);
+                    this.circuitManager.uiManager.showButtons(img);
+
+
+                    /*this.circuitManager.gridManager.canvasGrid.forEach(row => {
+                        console.log(row);
+                    });
+                });
+                img.on('selected', (options) => {
+
+                    if (this.circuitManager.mode === "connect") {
+                        let pointer = this.canvas.getPointer(options.e);
+                        this.circuitManager.wireManager.setConnectingTo(img, pointer);
+                        this.circuitManager.wireManager.stopConnecting(img);
+                    } else if (!this.circuitManager.mode || this.circuitManager.mode === 'select') {
+                        console.log('Image selected:', img);
+                        this.circuitManager.uiManager.showButtons(img);
+                    }
+                });
+                img.on('mousedblclick', (options) => {
+
+                });
+                */
+                this.canvas.add(img);
                 this.canvas.requestRenderAll();
-                //console.log('Image mouse up:', img);
-                this.circuitManager.componentManager.selectedComponent = img;
-                console.log("showing buttons for component:", img);
-                this.circuitManager.uiManager.showButtons(img);
-
-
-                /*this.circuitManager.gridManager.canvasGrid.forEach(row => {
-                    console.log(row);
-                });*/
-            });
-            img.on('selected', (options) => {
-    
-    if (this.circuitManager.mode === "connect") {
-        let pointer = this.canvas.getPointer(options.e);
-        this.circuitManager.wireManager.setConnectingTo(img, pointer);
-        this.circuitManager.wireManager.stopConnecting(img);
-    } else if (!this.circuitManager.mode || this.circuitManager.mode === 'select') {
-        console.log('Image selected:', img);
-        this.circuitManager.uiManager.showButtons(img);
-    }
-});
-            img.on('mousedblclick',  (options)=> {
-
-            });
-            this.canvas.add(img);
-        }
+            }
 
             rotateComponent(component) {
-            component.rotate((component.angle + 90) % 360);
-            component.set({
-                positionOfRotation: component.positionOfRotation + 1,
-            });
-            if (component.positionOfRotation === 4) {
-                component.positionOfRotation = 0;
-            }
-            switch (component.connectionPositions[0]) {
-                case 0:
-                    component.connectionPositions = [1, 0, 45];
-                    break;
-                case 1:
-                    component.connectionPositions = [2, -45, 0];
-                    break;
-                case 2:
-                    component.connectionPositions = [3, 0, -45];
-                    break;
-                case 3:
-                    component.connectionPositions = [0, 45, 0];
-                    break;
-            }
-            this.updateConnectionPositions(component);
+                component.rotate((component.angle + 90) % 360);
+                component.set({
+                    positionOfRotation: component.positionOfRotation + 1,
+                });
+                if (component.positionOfRotation === 4) {
+                    component.positionOfRotation = 0;
+                }
+                switch (component.connectionPositions[0]) {
+                    case 0:
+                        component.connectionPositions = [1, 0, 45];
+                        break;
+                    case 1:
+                        component.connectionPositions = [2, -45, 0];
+                        break;
+                    case 2:
+                        component.connectionPositions = [3, 0, -45];
+                        break;
+                    case 3:
+                        component.connectionPositions = [0, 45, 0];
+                        break;
+                }
+                this.updateConnectionPositions(component);
 
 
-            this.canvas.requestRenderAll();
-        }
-       
+                this.canvas.requestRenderAll();
+            }
+
             updateConnectionPositions(component) {
-            let positions = this.getConnectionPositions(component);
-            component.lines1.forEach((line) => {
-                if (line.connectedFrom === "plus") {
-                    line.set({
-                        x1: positions[0].x,
-                        y1: positions[0].y,
-                    });
-                } else {
-                    line.set({
-                        x1: positions[1].x,
-                        y1: positions[1].y,
-                    });
-                }
-                line.setCoords();
-            });
-            component.lines2.forEach((line) => {
-                if (line.connectedTo === "plus") {
-                    line.set({
-                        x2: positions[0].x,
-                        y2: positions[0].y,
-                    });
-                } else {
-                    line.set({
-                        x2: positions[1].x,
-                        y2: positions[1].y,
-                    });
-                }
-                line.setCoords();
-            });
+                let positions = this.getConnectionPositions(component);
+                component.lines1.forEach((line) => {
+                    if (line.connectedFrom === "plus") {
+                        line.set({
+                            x1: positions[0].x,
+                            y1: positions[0].y,
+                        });
+                    } else {
+                        line.set({
+                            x1: positions[1].x,
+                            y1: positions[1].y,
+                        });
+                    }
+                    line.setCoords();
+                });
+                component.lines2.forEach((line) => {
+                    if (line.connectedTo === "plus") {
+                        line.set({
+                            x2: positions[0].x,
+                            y2: positions[0].y,
+                        });
+                    } else {
+                        line.set({
+                            x2: positions[1].x,
+                            y2: positions[1].y,
+                        });
+                    }
+                    line.setCoords();
+                });
 
-            this.canvas.requestRenderAll();
-        }
-    
-            
-        turnSwitch(component) {
-            if (component.name === "Switch") {
-
-                if (component.line !== null) {
-                    console.log("turning off switch");
-                    component.setSrc('./images/switch_off.png').then(() => {
-                        this.circuitManager.wireManager.disconnectComponents(component.line);
-                        component.line = null;
-                        this.canvas.requestRenderAll();
-                    });
-                } else {
-                    console.log("turning on switch");
-                    component.setSrc('./images/switch_on.png').then(() => {
-                        this.circuitManager.wireManager.connectingFrom = "minus";
-                        this.circuitManager.wireManager.connectingTo = "plus";
-                        let line = this.circuitManager.wireManager.connectComponents(component, component);
-                        line.visible = false;
-                        component.line = line;
-                        this.canvas.requestRenderAll();
-                    });
-                }
-            } else {
-                console.log("frick you weathor boy)");
-                return;
+                this.canvas.requestRenderAll();
             }
+
+
+            turnSwitch(component) {
+                if (component.name === "Switch") {
+
+                    if (component.line !== null) {
+                        console.log("turning off switch");
+                        component.setSrc('./images/switch_off.png').then(() => {
+                            this.circuitManager.wireManager.disconnectComponents(component.line);
+                            component.line = null;
+                            this.canvas.requestRenderAll();
+                        });
+                    } else {
+                        console.log("turning on switch");
+                        component.setSrc('./images/switch_on.png').then(() => {
+                            this.circuitManager.wireManager.connectingFrom = "minus";
+                            this.circuitManager.wireManager.connectingTo = "plus";
+                            let line = this.circuitManager.wireManager.connectComponents(component, component);
+                            line.visible = false;
+                            component.line = line;
+                            this.canvas.requestRenderAll();
+                        });
+                    }
+                } else {
+                    console.log("frick you weathor boy)");
+                    return;
+                }
+            }
+
+
         }
-
-
-    }
 
         class WireManager {
-            constructor( circuitManager) {
+            constructor(circuitManager) {
                 this.canvas = circuitManager.canvas;
                 this.circuitManager = circuitManager;
             }
@@ -815,360 +1001,397 @@
             allLines = [];
 
             startConnecting(component) {
-            this.circuitManager.mode = 'connect';
-            this.circuitManager.componentManager.selectedComponent = component;
-            let strokeColor = component.lineColor;
-            let positions = this.circuitManager.componentManager.getConnectionPositions(component);
-            let index = 0;
-            if (this.connectingFrom === "minus") {
-                index = 1;
-            }
-            this.connectingLine = new fabric.Line([positions[index].x, positions[index].y, positions[index].x, positions[index].y], {
-                stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
-                strokeWidth: 4,
-                selectable: false,
-                evented: false,
-                hasControls: false,
-                hasBorders: false,
-            });
-            this.canvas.add(this.connectingLine);
-            this.canvas.on('mouse:move', (options) => {
-                if (this.circuitManager.mode) {
-                    let pointer = this.canvas.getPointer(options.e);
-                    this.connectingLine.set({ x2: pointer.x, y2: pointer.y });
-                    this.canvas.requestRenderAll();
+                console.log("starting to connect from component:", component);
+                this.circuitManager.mode = 'connect';
+                this.circuitManager.componentManager.selectedComponent = component;
+                let strokeColor = component.lineColor;
+                let positions = this.circuitManager.componentManager.getConnectionPositions(component);
+                let index = 0;
+                if (this.connectingFrom === "minus") {
+                    index = 1;
                 }
-            });
-
-        }
-            stopConnecting(component) {
-            if (component != null) {
-                this.connectComponents(this.circuitManager.componentManager.selectedComponent, component);
-                this.canvas.off('mouse:move');
-            }
-            this.circuitManager.mode = 'select';
-            if (this.connectingLine) {
-                this.canvas.remove(this.connectingLine);
-                this.connectingLine = null;
+                this.connectingLine = new fabric.Line([positions[index].x, positions[index].y, positions[index].x, positions[index].y], {
+                    stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
+                    strokeWidth: 4,
+                    selectable: false,
+                    evented: false,
+                    hasControls: false,
+                    hasBorders: false,
+                });
+                this.canvas.add(this.connectingLine);
+                this.canvas.bringObjectToFront(this.connectingLine);
                 this.canvas.requestRenderAll();
-            }
-        }
-            connectComponents(component1, component2) {
-
-            let positions1 = this.circuitManager.componentManager.getConnectionPositions(component1);
-            let positions2 = this.circuitManager.componentManager.getConnectionPositions(component2);
-            let index1 = 0;
-            let index2 = 0;
-            if (this.connectingFrom === "minus") {
-                index1 = 1;
-            }
-            if (this.connectingTo === "minus") {
-                index2 = 1;
-            }
-
-            let strokeColor = component1.lineColor;
-            const line = new fabric.Line([positions1[index1].x, positions1[index1].y, positions2[index2].x, positions2[index2].y], {
-                stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
-                strokeWidth: 4,
-                selectable: false,
-                positionLeft1: positions1[index1].x,
-                positionTop1: positions1[index1].y,
-                positionLeft2: positions2[index2].x,
-                positionTop2: positions2[index2].y,
-                connectedFrom: this.connectingFrom,
-                connectedFromComponent: component1,
-                connectedTo: this.connectingTo,
-                connectedToComponent: component2,
-                evented: false,
-                hasControls: false,
-                hasBorders: false,
-                lockRotation: true,
-                perPixelTargetFind: true,
-                targetFindTolerance: 5,
-            });
-
-
-
-            this.connectingFrom = null;
-            this.connectingTo = null;
-            component1.lines1.push(line);
-            component2.lines2.push(line);
-            this.allLines.push(line);
-            this.canvas.add(line);
-
-            this.canvas.moveObjectTo(line, this.bottom);
-            this.canvas.requestRenderAll();
-            return line;
-        }
-            disconnectComponents(line) {
-            if (!line.connectedFromComponent || !line.connectedToComponent) {
-                console.error("Line is not properly connected:", line);
-                return;
-            }
-            if (!line) {
-                console.error("Line is null or undefined:", line);
-                return;
-            }
-            line.connectedFromComponent.lines1.splice(line.connectedFromComponent.lines1.indexOf(line), 1);
-            line.connectedToComponent.lines2.splice(line.connectedToComponent.lines2.indexOf(line), 1);
-            this.allLines.splice(this.allLines.indexOf(line), 1);
-            this.canvas.remove(line);
-            this.canvas.requestRenderAll();
-        }
-            setConnectingTo(component, pointer) {
-            let positions = this.circuitManager.componentManager.getConnectionPositions(component);
-            let distanceToPlus = Math.hypot(pointer.x - positions[0].x, pointer.y - positions[0].y);
-            let distanceToMinus = Math.hypot(pointer.x - positions[1].x, pointer.y - positions[1].y);
-            if (distanceToPlus < distanceToMinus) {
-                this.connectingTo = "plus";
-            } else {
-                this.connectingTo = "minus";
-            }
-        }    
-            
-            toggleLineDeletionMode() {
-            if(this.circuitManager.mode === 'lineDeletion'){
-                this.circuitManager.mode = 'select';
-            } else {
-                this.circuitManager.mode = 'lineDeletion';
-            }
-            if (this.circuitManager.mode === 'lineDeletion') {
-                this.circuitManager.uiManager.hideButtons();
-                this.circuitManager.componentManager.selectedComponent.lines1.forEach((line, index) => {
-                    line.set({
-                        selectable: true,
-                        evented: true,
-                        hoverCursor: 'crosshair',
-                    });
-                    this.canvas.bringObjectToFront(line);
-                });
-                this.circuitManager.componentManager.selectedComponent.lines2.forEach((line, index) => {
-                    line.set({
-                        selectable: true,
-                        evented: true,
-                        hoverCursor: 'crosshair',
-                    });
-                    this.canvas.bringObjectToFront(line);
-                });
-                this.canvas.defaultCursor = 'crosshair';
-                this.canvas.on('mouse:down', (options) => {
-                    if (options.target && options.target.type === 'line') {
-                        this.disconnectComponents(options.target);
+                console.log("added connecting line:", this.connectingLine);
+                /*
+                this.canvas.on('mouse:move', (options) => {
+                    if (this.circuitManager.mode) {
+                        let pointer = this.canvas.getPointer(options.e);
+                        this.connectingLine.set({ x2: pointer.x, y2: pointer.y });
+                        this.canvas.requestRenderAll();
                     }
                 });
-            } else {
-                this.canvas.defaultCursor = 'default';
-                this.canvas.off('mouse:down');
-                this.circuitManager.componentManager.selectedComponent.lines1.forEach((line) => {
-                    line.set({
-                        selectable: false,
-                        evented: false,
-                        hoverCursor: 'default',
-                    });
-                    this.canvas.moveObjectTo(line, this.circuitManager.gridManager.bottom);
-                });
-                this.circuitManager.componentManager.selectedComponent.lines2.forEach((line) => {
-                    line.set({
-                        selectable: false,
-                        evented: false,
-                        hoverCursor: 'default',
-                    });
-                    this.canvas.moveObjectTo(line, this.circuitManager.gridManager.bottom);
-                });
+*/
             }
+            stopConnecting(component) {
+                this.circuitManager.mode = 'select';
+                console.log("stopping connecting to component:", component);
+                if (component != null) {
+                    this.connectComponents(this.circuitManager.componentManager.selectedComponent, component);
+                    //this.canvas.off('mouse:move');
+                }
+                this.circuitManager.mode = 'select';
+                if (this.connectingLine) {
+                    this.canvas.remove(this.connectingLine);
+                    this.connectingLine = null;
+                    this.canvas.requestRenderAll();
+                }
+            }
+            connectComponents(component1, component2) {
+                console.log("connecting components:", component1, component2);
+
+                let positions1 = this.circuitManager.componentManager.getConnectionPositions(component1);
+                let positions2 = this.circuitManager.componentManager.getConnectionPositions(component2);
+                let index1 = 0;
+                let index2 = 0;
+                if (this.connectingFrom === "minus") {
+                    index1 = 1;
+                }
+                if (this.connectingTo === "minus") {
+                    index2 = 1;
+                }
+                console.log("connection positions:", positions1, positions2);
+                let strokeColor = component1.lineColor;
+                const line = new fabric.Line([positions1[index1].x, positions1[index1].y, positions2[index2].x, positions2[index2].y], {
+                    stroke: `rgb(${strokeColor[0]}, ${strokeColor[1]}, ${strokeColor[2]})`,
+                    strokeWidth: 4,
+                    selectable: false,
+                    positionLeft1: positions1[index1].x,
+                    positionTop1: positions1[index1].y,
+                    positionLeft2: positions2[index2].x,
+                    positionTop2: positions2[index2].y,
+                    connectedFrom: this.connectingFrom,
+                    connectedFromComponent: component1,
+                    connectedTo: this.connectingTo,
+                    connectedToComponent: component2,
+                    evented: false,
+                    hasControls: false,
+                    hasBorders: false,
+                    lockRotation: true,
+                    perPixelTargetFind: true,
+                    targetFindTolerance: 5,
+                    visible: true,
+                    width: 4,
+                });
+                line.entityType = 'line';
+
+
+
+                this.connectingFrom = null;
+                this.connectingTo = null;
+                component1.lines1.push(line);
+                component2.lines2.push(line);
+                this.allLines.push(line);
+                this.canvas.add(line);
+                console.log("added line:", line);
+
+                this.canvas.bringObjectToFront(line);
+                this.canvas.requestRenderAll();
+                console.log("connected components with line:", line);
+                return line;
+            }
+            disconnectComponents(line) {
+                if (!line.connectedFromComponent || !line.connectedToComponent) {
+                    console.error("Line is not properly connected:", line);
+                    return;
+                }
+                if (!line) {
+                    console.error("Line is null or undefined:", line);
+                    return;
+                }
+                line.connectedFromComponent.lines1.splice(line.connectedFromComponent.lines1.indexOf(line), 1);
+                line.connectedToComponent.lines2.splice(line.connectedToComponent.lines2.indexOf(line), 1);
+                this.allLines.splice(this.allLines.indexOf(line), 1);
+                this.canvas.remove(line);
+                this.canvas.requestRenderAll();
+            }
+            setConnectingTo(component, pointer) {
+                let positions = this.circuitManager.componentManager.getConnectionPositions(component);
+                let distanceToPlus = Math.hypot(pointer.x - positions[0].x, pointer.y - positions[0].y);
+                let distanceToMinus = Math.hypot(pointer.x - positions[1].x, pointer.y - positions[1].y);
+                if (distanceToPlus < distanceToMinus) {
+                    this.connectingTo = "plus";
+                } else {
+                    this.connectingTo = "minus";
+                }
+            }
+
+            toggleLineDeletionMode() {
+                if (this.circuitManager.mode === 'lineDeletion') {
+                    this.circuitManager.mode = 'select';
+                } else {
+                    this.circuitManager.mode = 'lineDeletion';
+                }
+                if (this.circuitManager.mode === 'lineDeletion') {
+                    this.circuitManager.uiManager.hideButtons();
+                    this.circuitManager.componentManager.selectedComponent.lines1.forEach((line, index) => {
+                        line.set({
+                            selectable: true,
+                            evented: true,
+                            hoverCursor: 'crosshair',
+                        });
+                        this.canvas.bringObjectToFront(line);
+                    });
+                    this.circuitManager.componentManager.selectedComponent.lines2.forEach((line, index) => {
+                        line.set({
+                            selectable: true,
+                            evented: true,
+                            hoverCursor: 'crosshair',
+                        });
+                        this.canvas.bringObjectToFront(line);
+                    });
+                    this.canvas.defaultCursor = 'crosshair';
+                    /*
+                    this.canvas.on('mouse:down', (options) => {
+                        if (options.target && options.target.type === 'line') {
+                            this.disconnectComponents(options.target);
+                        }
+                    });*/
+                } else {
+                    this.canvas.defaultCursor = 'default';
+                    
+                    /*this.canvas.off('mouse:down');*/
+                    this.circuitManager.componentManager.selectedComponent.lines1.forEach((line) => {
+                        line.set({
+                            selectable: false,
+                            evented: false,
+                            hoverCursor: 'default',
+                        });
+                        this.canvas.moveObjectTo(line, this.circuitManager.gridManager.bottom);
+                    });
+                    this.circuitManager.componentManager.selectedComponent.lines2.forEach((line) => {
+                        line.set({
+                            selectable: false,
+                            evented: false,
+                            hoverCursor: 'default',
+                        });
+                        this.canvas.moveObjectTo(line, this.circuitManager.gridManager.bottom);
+                    });
+                }
+                this.canvas.requestRenderAll();
+            }
+
         }
-        
-    }
 
         class UIManager {
             constructor(circuitManager) {
-               this.canvas = circuitManager.canvas;
+                this.canvas = circuitManager.canvas;
                 this.circuitManager = circuitManager;
             }
-                text;
-                text_holder;
-                plus_button;
-                minus_button;
-                delete_button;
-                rotate_button;
-                lineDeletionButton;
+            text;
+            text_holder;
+            plus_button;
+            minus_button;
+            delete_button;
+            rotate_button;
+            lineDeletionButton;
 
-                addButton(buttonName,url) {
-                    button = new fabric.Image.fromURL(url).then((img) => {
-                        this[buttonName] = img;
-                        this.buttonSetUp(img);
-                        return img;
-                    });
-                }
-                buttonSetUp(button) {
-                button.set({
-                hasControls: false,
-                hasBorders: false,
-                lockRotation: true,
-                selectable: false,
-                lockMovementX: true,
-                lockMovementY: true,
-                visible: false,
-                dirty: true,
-                fill: 'black',
-                hoverCursor: 'pointer',
-                visible: false,
-                originX: 'center',
-                originY: 'center',
-                scaleX: 0.15,
-                scaleY: 0.15,
-
-            });
-            this.canvas.add(button);
-            switch (button) {
-                case this.text:
-                    button.offsetX = 0;
-                    button.offsetY = -70;
-                    break;
-                case this.text_holder:
-                    button.offsetX = 0;
-                    button.offsetY = -70;
-                    button.set({ width: 500, scaleX: 0.2, scaleY: 0.2 });
-                    break;
-                case this.plus_button:
-                    button.offsetX = 50;
-                    button.offsetY = -50;
-                    break;
-                case this.minus_button:
-                    button.offsetX = -50;
-                    button.offsetY = -50;
-                    break;
-                case this.delete_button:
-                    button.offsetX = 50;
-                    button.offsetY = 50;
-                    break;
-                case this.rotate_button:
-                    button.offsetX = -50;
-                    button.offsetY = 50;
-                    break;
-                case this.lineDeletionButton:
-                    button.offsetX = 0;
-                    button.offsetY = 70;
-                    break;
-        }
-    }
-            showButton(button,component){
-                    button.set({
-                        left: component.left + button.offsetX,
-                        top: component.top + button.offsetY, 
-                        visible: true,
-                    });
-                    button.setCoords();
-                    this.canvas.bringObjectToFront(button);
-                }
-                    
-            
-        
-                hideButton(button) {
-                    button.set({
-                        visible: false,
-                    });
-                }
-                showButtons(component) {
-                    console.log("showing buttons for component:", component);
-                    this.showButton(this.text, component);
-                    this.showButton(this.text_holder, component);
-                    this.showButton(this.plus_button, component);
-                    this.showButton(this.minus_button, component);
-                    this.showButton(this.delete_button, component);
-                    this.showButton(this.rotate_button, component);
-                    this.showButton(this.lineDeletionButton, component);
-                    canvas.requestRenderAll();
-                }
-                hideButtons() {
-                    this.hideButton(this.text);
-                    this.hideButton(this.text_holder);
-                    this.hideButton(this.plus_button);
-                    this.hideButton(this.minus_button);
-                    this.hideButton(this.delete_button);
-                    this.hideButton(this.rotate_button);
-                    this.hideButton(this.lineDeletionButton);
-                }
-        
-                initButtons() {
-        // Setup Text Label
-        this.text = new fabric.Text('', {
-            left: 150, top: 100, fontSize: 150, fill: 'black', originX: 'center', originY: 'center', width: 1000, scaleX: 0.2, scaleY: 0.2,
-        });
-        this.buttonSetUp(this.text);
-
-        // Setup Images and bind their click events
-        fabric.Image.fromURL('./images/text_holder.png').then((img) => {
-            this.text_holder = img; this.buttonSetUp(img);
-        });
-
-        fabric.Image.fromURL('./images/plus_button.png').then((img) => {
-            this.plus_button = img; this.buttonSetUp(img);
-            img.on('mousedown', () => {
-                this.circuitManager.wireManager.connectingFrom = "plus";
-                this.hideButtons();
-                this.circuitManager.wireManager.startConnecting(this.circuitManager.componentManager.selectedComponent);
-            });
-        });
-
-        fabric.Image.fromURL('./images/minus_button.png').then((img) => {
-            this.minus_button = img; this.buttonSetUp(img);
-            img.on('mousedown', () => {
-                this.circuitManager.wireManager.connectingFrom = "minus";
-                this.hideButtons();
-                this.circuitManager.wireManager.startConnecting(this.circuitManager.componentManager.selectedComponent);
-            });
-        });
-
-        fabric.Image.fromURL('./images/delete_button.png').then((img) => {
-            this.delete_button = img; this.buttonSetUp(img);
-            img.on('mouseup', () => {
-                this.circuitManager.componentManager.deleteComponent(this.circuitManager.componentManager.selectedComponent);
-                this.circuitManager.componentManager.selectedComponent = null;
-            });
-        });
-
-        fabric.Image.fromURL('./images/rotate_button.png').then((img) => {
-            this.rotate_button = img; this.buttonSetUp(img);
-            img.on('mousedown', () => {
-                this.circuitManager.componentManager.rotateComponent(this.circuitManager.componentManager.selectedComponent);
-            });
-        });
-
-        fabric.Image.fromURL('./images/delete_line_button.png').then((img) => {
-            this.lineDeletionButton = img; this.buttonSetUp(img);
-            img.on('mousedown', () => {
-                this.circuitManager.wireManager.toggleLineDeletionMode();
-            });
-        });
-    }
-        
+            addButton(buttonName, url) {
+                button = new fabric.Image.fromURL(url).then((img) => {
+                    this[buttonName] = img;
+                    this.buttonSetUp(img);
+                    return img;
+                });
             }
-    
+            buttonSetUp(button) {
+                button.set({
+                    hasControls: false,
+                    hasBorders: false,
+                    lockRotation: true,
+                    selectable: false,
+                    lockMovementX: true,
+                    lockMovementY: true,
+                    visible: false,
+                    dirty: true,
+                    fill: 'black',
+                    hoverCursor: 'pointer',
+                    visible: false,
+                    originX: 'center',
+                    originY: 'center',
+                    scaleX: 0.15,
+                    scaleY: 0.15,
+                    fontSize: 250
+                    
+
+
+                });
+                button.entityType = 'button';
+                button.buttonType = null;
+                this.canvas.add(button);
+                switch (button) {
+                    case this.text:
+                        button.offsetX = 0;
+                        button.offsetY = -70;
+                        button.buttonType = "text";
+                        break;
+                    case this.text_holder:
+                        button.offsetX = 0;
+                        button.offsetY = -70;
+                        button.set({ scaleX: 0.2, scaleY: 0.2 });
+                        button.buttonType = "text_holder";
+                        break;
+                    case this.plus_button:
+                        button.offsetX = 90;
+                        button.offsetY = 0;
+                        button.buttonType = "plus";
+                        break;
+                    case this.minus_button:
+                        button.offsetX = -90;
+                        button.offsetY = 0;
+                        button.buttonType = "minus";
+                        break;
+                    case this.delete_button:
+                        button.offsetX = 70;
+                        button.offsetY = 80;
+                        button.buttonType = "delete";
+                        break;
+                    case this.rotate_button:
+                        button.offsetX = -70;
+                        button.offsetY = 80;
+                        button.buttonType = "rotate";
+                        break;
+                    case this.lineDeletionButton:
+                        button.offsetX = 0;
+                        button.offsetY = 80;
+                        button.buttonType = "lineDeletion";
+                        break;
+                }
+            }
+            showButton(button, component) {
+                if(button.buttonType === "text") {
+                    button.set({ 
+                        text: component.name });
+                    
+                }
+                button.set({
+                    left: component.left + button.offsetX,
+                    top: component.top + button.offsetY,
+                    visible: true,
+                });
+                button.parentComponent = component;
+                button.setCoords();
+                this.canvas.bringObjectToFront(button);
+            }
+            hideButton(button) {
+                button.set({
+                    visible: false,
+                });
+            }
+            showButtons(component) {
+                console.log("showing buttons for component:", component);
+                
+                this.showButton(this.text_holder, component);
+                this.showButton(this.text, component);
+                this.showButton(this.plus_button, component);
+                this.showButton(this.minus_button, component);
+                this.showButton(this.delete_button, component);
+                this.showButton(this.rotate_button, component);
+                this.showButton(this.lineDeletionButton, component);
+                this.canvas.requestRenderAll();
+            }
+            hideButtons() {
+                this.hideButton(this.text);
+                this.hideButton(this.text_holder);
+                this.hideButton(this.plus_button);
+                this.hideButton(this.minus_button);
+                this.hideButton(this.delete_button);
+                this.hideButton(this.rotate_button);
+                this.hideButton(this.lineDeletionButton);
+                this.canvas.requestRenderAll();
+            }
+            initButtons() {
+                // Setup Text Label
+                this.text = new fabric.Text('', {
+                    left: 150, top: 100, fontSize: 150, fill: 'black', originX: 'center', originY: 'center', width: 1000, scaleX: 0.2, scaleY: 0.2,
+                });
+                this.buttonSetUp(this.text);
+
+                // Setup Images and bind their click events
+                fabric.Image.fromURL('./images/text_holder.png').then((img) => {
+                    this.text_holder = img; this.buttonSetUp(img);
+                });
+
+                fabric.Image.fromURL('./images/plus_button.png').then((img) => {
+                    this.plus_button = img; this.buttonSetUp(img);
+                    /*
+                    img.on('mousedown', () => {
+                        this.circuitManager.wireManager.connectingFrom = "plus";
+                        this.hideButtons();
+                        this.circuitManager.wireManager.startConnecting(this.circuitManager.componentManager.selectedComponent);
+                    });*/
+                });
+
+                fabric.Image.fromURL('./images/minus_button.png').then((img) => {
+                    this.minus_button = img; this.buttonSetUp(img);
+                    /*
+                    img.on('mousedown', () => {
+                        this.circuitManager.wireManager.connectingFrom = "minus";
+                        this.hideButtons();
+                        this.circuitManager.wireManager.startConnecting(this.circuitManager.componentManager.selectedComponent);
+                    });*/
+                });
+
+                fabric.Image.fromURL('./images/delete_button.png').then((img) => {
+                    this.delete_button = img; this.buttonSetUp(img);
+                    /*
+                    img.on('mouseup', () => {
+                        this.circuitManager.componentManager.deleteComponent(this.circuitManager.componentManager.selectedComponent);
+                        this.circuitManager.componentManager.selectedComponent = null;
+                    });*/
+                });
+
+                fabric.Image.fromURL('./images/rotate_button.png').then((img) => {
+                    this.rotate_button = img; this.buttonSetUp(img);
+                    /*
+                    img.on('mousedown', () => {
+                        this.circuitManager.componentManager.rotateComponent(this.circuitManager.componentManager.selectedComponent);
+                    });*/
+                });
+
+                fabric.Image.fromURL('./images/delete_line_button.png').then((img) => {
+                    this.lineDeletionButton = img; this.buttonSetUp(img);
+                    /*
+                    img.on('mousedown', () => {
+                        this.circuitManager.wireManager.toggleLineDeletionMode();
+                    });*/
+                });
+            }
+
+        }
+
 
         // 1. Set up the raw Fabric Canvas
-const canvas = new fabric.Canvas('canvas');
-canvas.backgroundColor = 'white';
-canvas.preserveObjectStacking = true;
-canvas.selection = false;
+        const canvas = new fabric.Canvas('canvas');
+        canvas.backgroundColor = 'white';
+        canvas.preserveObjectStacking = true;
+        canvas.selection = false;
 
-// 2. Instantiate your shiny new Application!
-const myApp = new CircuitEditor(canvas);
+        // 2. Instantiate your shiny new Application!
+        const myApp = new CircuitEditor(canvas);
 
-// 3. Initialize everything
-myApp.init();
-myApp.bindEvents();
-myApp.uiManager.initButtons();
+        // 3. Initialize everything
+        myApp.init();
+        myApp.bindEvents();
+        myApp.uiManager.initButtons();
 
-// 4. Handle Window Resizing smoothly
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => myApp.resizeCanvas(), 100);
-});
+        // 4. Handle Window Resizing smoothly
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => myApp.resizeCanvas(), 100);
+        });
 
-// To test it, try adding a component:
-// myApp.componentManager.addComponent('./images/resistor.png', 'Resistor');
+        // To test it, try adding a component:
+        // myApp.componentManager.addComponent('./images/resistor.png', 'Resistor');
     </script>
 </body>
 
