@@ -30,55 +30,38 @@ export class CircuitEditor {
     setMode(newMode) {
         this.mode = newMode;
     }
-    resizeCanvas() {
-        let main = document.querySelector('main');
-        let containerWidth = main.clientWidth;
-        let containerHeight = main.clientHeight;
-
-        // 1. Set physical HTML canvas dimensions to fill the space
-        this.canvas.setDimensions({
-            width: containerWidth,
-            height: containerHeight
-        });
-
-        // 2. Calculate the zoom scale
-        this.zoom = Math.min(containerWidth / this.gridManager.designWidth, containerHeight / this.gridManager.designHeight);
-        this.canvas.setZoom(this.zoom);
-
-        // 3. CENTER THE CANVAS! 
-        // Calculate leftover space in physical pixels, divide by 2, and apply to the viewport transform.
-        const panX = (containerWidth - (this.gridManager.designWidth * this.zoom)) / 2;
-        const panY = (containerHeight - (this.gridManager.designHeight * this.zoom)) / 2;
-
-        // viewportTransform matrix: [scaleX, skewY, skewX, scaleY, panX, panY]
-        let vpt = this.canvas.viewportTransform;
-        vpt[4] = panX;
-        vpt[5] = panY;
-
-        // 4. Finalize
-        this.canvas.requestRenderAll();
-        this.canvas.calcOffset(); // Critical for mouse events to align with the new zoom/pan
-        /*
-     function resizeCanvas() {
+ 
+        resizeCanvas() {
        //https://fabricjs.com/docs/old-docs/fabric-intro-part-5/
        let main = document.querySelector('main');
        let containerWidth = main.clientWidth;
        let containerHeight = main.clientHeight;
-       canvas.setDimensions({
+       this.canvas.setDimensions({
          width: containerWidth,
          height: containerHeight
        });
+
+
        console.log('Resizing canvas to fit container:', containerWidth, containerHeight);
-        zoom = Math.min(containerWidth / DESIGN_WIDTH, containerHeight / DESIGN_HEIGHT);
-        console.log('Calculated zoom:', zoom);
-       canvas.setZoom(zoom);
-       canvas.requestRenderAll();
-       //canvas.setDimensions({ width: containerWidth*zoom, height: containerHeight*zoom });
-       canvas.calcOffset();
+        this.zoom = Math.min(containerWidth / this.gridManager.designWidth, containerHeight / this.gridManager.designHeight);
+        console.log('Calculated zoom:', this.zoom);
+       this.canvas.setZoom(this.zoom);
+
+       //Centering the canvas on the grid, helped with Copilot----
+        const panX = (containerWidth - (this.gridManager.designWidth * this.zoom)) / 2;
+        const panY = (containerHeight - (this.gridManager.designHeight * this.zoom)) / 2;
+
+        let viewportTransform = this.canvas.viewportTransform;
+        viewportTransform[4] = panX;
+        viewportTransform[5] = panY;
+       //-------
+
+
+       this.canvas.requestRenderAll();
+       this.canvas.calcOffset();
    
-     }
      
-     */
+     
     }
 
     bindEvents() {
@@ -165,7 +148,7 @@ export class CircuitEditor {
                     }
 
                     break;
-                default:
+                        default:
                     break;
 
             }
@@ -177,7 +160,7 @@ export class CircuitEditor {
                 this.uiManager.hideButtons();
                 let gridPossition = this.gridManager.getGridArrayFromPosition(target.left, target.top);
                 if (gridPossition) {
-                    if (this.gridManager.isGridPositionEmpty(gridPossition.gridX, gridPossition.gridY) || (target.gridPositionX === gridPossition.gridX && target.gridPositionY === gridPossition.gridY)) {
+                    if (this.gridManager.isGridPositionEmpty(gridPossition.gridX, gridPossition.gridY) || (target.startX === gridPossition.gridX && target.startY === gridPossition.gridY)) {
                         target.left = Math.round(target.left / this.gridManager.gridSize) * this.gridManager.gridSize;
                         target.top = Math.round(target.top / this.gridManager.gridSize) * this.gridManager.gridSize;
                         target.gridPositionX = gridPossition.gridX;
@@ -234,6 +217,7 @@ export class CircuitEditor {
                     [...target.lines2].forEach((line) => {
                         this.wireManager.disconnectComponents(line);
                     });
+                    this.calculateCircuit();
                     return;
                 } else {
                     this.gridManager.addComponentToGrid(target, target.gridPositionX, target.gridPositionY);
@@ -249,7 +233,8 @@ export class CircuitEditor {
                 }
                 this.componentManager.updateConnectionPositions(target);
             }
-
+            console.log("Calculating circuit...");
+            this.calculateCircuit();
             this.canvas.requestRenderAll();
         });
 

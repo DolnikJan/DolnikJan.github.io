@@ -47,8 +47,8 @@ header h1 {
 /* --- Sidebars --- */
 .sidebar {
     background-color: white;
-    padding: 12px;
-    width:15vw;
+    padding: 8px;
+    width:220px;
     overflow-y: auto;
     display: flex;
     flex-shrink: 0;
