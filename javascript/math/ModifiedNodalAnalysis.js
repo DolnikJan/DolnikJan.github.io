@@ -116,8 +116,11 @@ static calculateCircuit(circuit) {
                 return;
             }
         if(component instanceof VoltageSource) {
+            let sourceIndex = subCircuit.voltageSources.indexOf(component);
+            let calculatedCurrent = matrixI[activeNodes + sourceIndex][0];
+
             
-            component.setCurrent(Math.round(matrixI[activeNodes + component.number][0] * 100) / 100);
+            component.setCurrent(Math.round(calculatedCurrent * 100) / 100);
         } else {
            
             let voltage = 0;

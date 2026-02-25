@@ -324,12 +324,20 @@ export class CircuitEditor {
                 key.calculatorComponent.setVoltage(value.getVoltage());
                 key.calculatorComponent.setCurrent(value.getCurrent());
                 key.calculatorComponent.setResistance(value.getResistance());
+
+                if(key.name === "Light Bulb") {
+                    console.log("Updating brightness of bulb " + key.name);
+                    this.componentManager.updateBrightnessOfBulb(key);
+                }else{
+                    console.log("Not a light bulb component: " + key.name);
+                }
             }
         });
     }
     calculateCircuit() {
         this.prepareCircuit();
         ModifiedNodalAnalysis.calculateCircuit(this.myCircuit);
+        console.log("Circuit calculation complete. Updating component values...");
         this.updateCircuit();
     }
 }

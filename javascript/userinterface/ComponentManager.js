@@ -198,13 +198,18 @@
                         component.setSrc('./images/switch_off.png').then(() => {
                             component.calculatorComponent.resistance = 100000000;
                             component.isOn = false;
-                            console.log(component.isOn);
+                            this.canvas.requestRenderAll();
+                            
+                            this.circuitManager.calculateCircuit();
                         });
                     } else {
                         console.log("turning on switch");
-                        component.isOn = true;
+                       
                         component.setSrc('./images/switch_on.png').then(() => {
                             component.calculatorComponent.resistance = 0.00000001;
+                             component.isOn = true;
+                            
+                this.circuitManager.calculateCircuit();
                             this.canvas.requestRenderAll();
                         });
                     }
@@ -212,8 +217,22 @@
                     console.log("frick you weathor boy)");
                     return;
                 }
-                this.circuitManager.calculateCircuit();
-
+            }
+            
+            updateBrightnessOfBulb(component) {
+                if (component.name === "Light Bulb") {
+                    if(component.calculatorComponent.current > 0) {
+                        console.log("turning on light bulb");
+                        component.setSrc('./images/light_bulb_on.png').then(() => {
+                            this.canvas.requestRenderAll();
+                        });
+                } else {
+                    console.log("turning off light bulb");
+                    component.setSrc('./images/light_bulb_off.png').then(() => {
+                        this.canvas.requestRenderAll();
+                    });
+                }
+                }
             }
 
 
