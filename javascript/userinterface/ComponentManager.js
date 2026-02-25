@@ -221,7 +221,7 @@
             
             updateBrightnessOfBulb(component) {
                 if (component.name === "Light Bulb") {
-                    if(component.calculatorComponent.current > 0) {
+                    if(component.calculatorComponent.current !== 0) {
                         console.log("turning on light bulb");
                         component.setSrc('./images/light_bulb_on.png').then(() => {
                             this.canvas.requestRenderAll();
