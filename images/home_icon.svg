@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="99.736847mm"
+   height="99.736847mm"
+   viewBox="0 0 99.736847 99.736847"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="light_bulb_on.svg"
+   inkscape:export-filename="library_icon.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="1.6050238"
+     inkscape:cx="93.145034"
+     inkscape:cy="151.71114"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="-0.13157906"
+       originy="-0.13157916"
+       spacingx="5"
+       spacingy="5"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+    <inkscape:page
+       x="0"
+       y="0"
+       width="99.736847"
+       height="99.736847"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <rect
+       x="37.29797"
+       y="93.990883"
+       width="283.46457"
+       height="188.97638"
+       id="rect4" />
+    <rect
+       x="37.29797"
+       y="93.990883"
+       width="294.16129"
+       height="188.97638"
+       id="rect2" />
+  </defs>
+  <g
+     id="layer1"
+     transform="matrix(1.0526316,0,0,1.0526316,-2.763158,-2.7631579)">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4.75;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;paint-order:markers stroke fill"
+       id="rect1"
+       width="90"
+       height="90"
+       x="5"
+       y="5"
+       ry="30" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.25135416,0,0,0.25135416,2.625,2.625)"
+       id="text1"
+       style="font-size:46.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2);fill:#efff01;stroke:#000000;stroke-width:9.44882;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
+       d="M 16.75,21.499999 H 83.249996"
+       id="path3" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
+       d="M 16.750001,78.499998 H 83.249997"
+       id="path3-8" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.54457923,0,0,1.2827543,-8.7677848,-103.04746)"
+       id="text3"
+       style="font-size:46.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4);fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:3.77953;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"><tspan
+         x="37.298828"
+         y="136.02547"
+         id="tspan1">HOME</tspan></text>
+  </g>
+</svg>
